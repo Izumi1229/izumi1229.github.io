@@ -200,19 +200,46 @@ ${content}
   await fs.writeFile(filePath, markdown, "utf-8");
 
   try {
-    await execFileAsync("git", ["add", "."]);
-    await execFileAsync("git", [
-      "commit",
-      "-m",
-      `publish: ${title}`,
-    ]);
-    await execFileAsync("git", ["push"]);
+    const relativePath = path.relative(root, filePath);
+
+    // 只暂存当前文章，避免提交其他未完成的修改。
+    await execFileAsync("git", ["add", "--", relativePath]);
+
+    // 只提交当前文章。
+    try {
+      await execFileAsync("git", [
+        "commit",
+        "--only",
+        "-m",
+        `publish: ${title}`,
+        "--",
+        relativePath,
+      ]);
+    } catch (error) {
+      const output = String(error.stdout || "") + String(error.stderr || "");
+      if (
+        error.code !== 1 ||
+        !/nothing to commit|no changes added to commit/i.test(output)
+      ) {
+        throw error;
+      }
+    }
+
+    // 明确推送到远程 main 分支。
+    await execFileAsync("git", ["push", "origin", "main"]);
   } catch (error) {
-    console.error("Git 自动发布失败：", error);
+    const details = [
+      error.stderr,
+      error.stdout,
+      error.message,
+    ].filter(Boolean).map(String).join("\n").trim();
+
+    console.error("Git 自动发布失败：", details);
 
     return {
       success: false,
-      message: "文章已生成，但自动同步到 GitHub 失败，请检查终端。",
+      message: "文章已保存到本地，但同步 GitHub 失败：" +
+        (details || "未能获取具体错误原因"),
     };
   }
 
