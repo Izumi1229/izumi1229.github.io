@@ -5,6 +5,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
+import { withGitLock } from "../scripts/git-lock.mjs";
 
 const root = process.cwd();
 
@@ -202,31 +203,33 @@ ${content}
   try {
     const relativePath = path.relative(root, filePath);
 
-    // 只暂存当前文章，避免提交其他未完成的修改。
-    await execFileAsync("git", ["add", "--", relativePath]);
+    await withGitLock(async () => {
+      // 只暂存当前文章，避免提交其他未完成的修改。
+      await execFileAsync("git", ["add", "--", relativePath]);
 
-    // 只提交当前文章。
-    try {
-      await execFileAsync("git", [
-        "commit",
-        "--only",
-        "-m",
-        `publish: ${title}`,
-        "--",
-        relativePath,
-      ]);
-    } catch (error) {
-      const output = String(error.stdout || "") + String(error.stderr || "");
-      if (
-        error.code !== 1 ||
-        !/nothing to commit|no changes added to commit/i.test(output)
-      ) {
-        throw error;
+      // 只提交当前文章。
+      try {
+        await execFileAsync("git", [
+          "commit",
+          "--only",
+          "-m",
+          `publish: ${title}`,
+          "--",
+          relativePath,
+        ]);
+      } catch (error) {
+        const output = String(error.stdout || "") + String(error.stderr || "");
+        if (
+          error.code !== 1 ||
+          !/nothing to commit|no changes added to commit/i.test(output)
+        ) {
+          throw error;
+        }
       }
-    }
 
-    // 明确推送到远程 main 分支。
-    await execFileAsync("git", ["push", "origin", "main"]);
+      // 明确推送到远程 main 分支。
+      await execFileAsync("git", ["push", "origin", "main"]);
+    });
   } catch (error) {
     const details = [
       error.stderr,
@@ -417,9 +420,13 @@ const server = http.createServer(async (req, res) => {
       await fs.writeFile(filePath, updated, "utf-8");
 
       try {
-        await execFileAsync("git", ["add", "src/pages/about.astro"]);
-        await execFileAsync("git", ["commit", "-m", "update: about"]);
-        await execFileAsync("git", ["push", "origin", "main"]);
+        await withGitLock(async () => {
+          await execFileAsync("git", ["add", "--", "src/pages/about.astro"]);
+          await execFileAsync("git", [
+            "commit", "--only", "-m", "update: about", "--", "src/pages/about.astro"
+          ]);
+          await execFileAsync("git", ["push", "origin", "main"]);
+        });
       } catch (error) {
         console.error("About Git 自动发布失败：", error);
       }
@@ -553,23 +560,37 @@ const server = http.createServer(async (req, res) => {
           }
 
           const filePath = path.resolve(root, "src/pages", file);
+          const relativeFilePath = path.relative(root, filePath);
 
           await fs.unlink(filePath);
 
           try {
-            await execFileAsync("git", ["add", "-A"], { cwd: root });
+            await withGitLock(async () => {
+              await execFileAsync(
+                "git",
+                ["add", "--", relativeFilePath],
+                { cwd: root }
+              );
 
-            await execFileAsync(
-              "git",
-              ["commit", "-m", `delete post: ${path.basename(file, ".md")}`],
-              { cwd: root }
-            );
+              await execFileAsync(
+                "git",
+                [
+                  "commit",
+                  "--only",
+                  "-m",
+                  `delete post: ${path.basename(file, ".md")}`,
+                  "--",
+                  relativeFilePath,
+                ],
+                { cwd: root }
+              );
 
-            await execFileAsync(
-              "git",
-              ["push", "origin", "main"],
-              { cwd: root }
-            );
+              await execFileAsync(
+                "git",
+                ["push", "origin", "main"],
+                { cwd: root }
+              );
+            });
           } catch (gitError) {
             console.error("Git 操作失败：", gitError);
           }
@@ -859,18 +880,27 @@ ${String(data.content || "")}
           );
 
           try {
-            await execFileAsync("git", ["add", "src/data/friends.json"], {
-              cwd: root,
-            });
+            await withGitLock(async () => {
+              await execFileAsync("git", ["add", "--", "src/data/friends.json"], {
+                cwd: root,
+              });
 
-            await execFileAsync(
-              "git",
-              ["commit", "-m", `delete friend: ${deleted.name}`],
-              { cwd: root }
-            );
+              await execFileAsync(
+                "git",
+                [
+                  "commit",
+                  "--only",
+                  "-m",
+                  `delete friend: ${deleted.name}`,
+                  "--",
+                  "src/data/friends.json",
+                ],
+                { cwd: root }
+              );
 
-            await execFileAsync("git", ["push", "origin", "main"], {
-              cwd: root,
+              await execFileAsync("git", ["push", "origin", "main"], {
+                cwd: root,
+              });
             });
           } catch (gitError) {
             console.error("Git 删除发布失败：", gitError);
@@ -970,18 +1000,27 @@ ${String(data.content || "")}
           );
 
           try {
-            await execFileAsync("git", ["add", "src/data/friends.json"], {
-              cwd: root,
-            });
+            await withGitLock(async () => {
+              await execFileAsync("git", ["add", "--", "src/data/friends.json"], {
+                cwd: root,
+              });
 
-            await execFileAsync(
-              "git",
-              ["commit", "-m", `add friend: ${String(data.name).trim()}`],
-              { cwd: root }
-            );
+              await execFileAsync(
+                "git",
+                [
+                  "commit",
+                  "--only",
+                  "-m",
+                  `add friend: ${String(data.name).trim()}`,
+                  "--",
+                  "src/data/friends.json",
+                ],
+                { cwd: root }
+              );
 
-            await execFileAsync("git", ["push", "origin", "main"], {
-              cwd: root,
+              await execFileAsync("git", ["push", "origin", "main"], {
+                cwd: root,
+              });
             });
           } catch (gitError) {
             console.error("Git 发布失败：", gitError);

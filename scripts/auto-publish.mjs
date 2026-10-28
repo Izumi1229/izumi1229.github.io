@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { withGitLock } from "./git-lock.mjs";
 
 const root = process.cwd();
 const watchedDirs = ["src", "public"];
@@ -16,7 +17,7 @@ function run(command, args) {
   });
 }
 
-function publish() {
+async function publish() {
   if (publishing) {
     pending = true;
     return;
@@ -29,17 +30,30 @@ function publish() {
     console.log("\n🔎 检查并构建博客……");
     run("npm", ["run", "build"]);
 
-    run("git", ["add", "-A"]);
+    await withGitLock(async () => {
+      // 只处理博客内容目录，不把其他文件一起提交。
+      run("git", ["add", "--", "src", "public"]);
 
-    try {
-      run("git", ["diff", "--cached", "--quiet"]);
-      console.log("ℹ️ 没有新的 Git 修改需要发布。");
-    } catch {
-      run("git", ["commit", "-m", "Auto publish blog"]);
-      console.log("📤 正在上传到 GitHub……");
-      run("git", ["push", "origin", "main"]);
-      console.log("✅ 上传成功！GitHub Actions 将自动部署网站。");
-    }
+      try {
+        run("git", ["diff", "--cached", "--quiet", "--", "src", "public"]);
+        console.log("ℹ️ 没有新的博客内容需要发布。");
+      } catch (error) {
+        // 退出码 1 表示存在差异；其他错误不能当作有差异处理。
+        if (error.status !== 1) throw error;
+
+        run("git", [
+          "commit",
+          "-m",
+          "Auto publish blog",
+          "--",
+          "src",
+          "public",
+        ]);
+        console.log("📤 正在上传到 GitHub……");
+        run("git", ["push", "origin", "main"]);
+        console.log("✅ 上传成功！GitHub Actions 将自动部署网站。");
+      }
+    });
   } catch (error) {
     console.error("❌ 自动发布失败，请检查下面的错误：");
     console.error(error.stderr?.toString() || error.message);
