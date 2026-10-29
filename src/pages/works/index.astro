@@ -19,6 +19,7 @@ function getExcerpt(post) {
 
   content = content
     .replace(/^---[\s\S]*?---\s*/, "")
+    .replace(/::blur\[([\s\S]*?)\]::/g, "$1")
     .replace(/```[\s\S]*?```/g, "")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
