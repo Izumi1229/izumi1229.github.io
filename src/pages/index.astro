@@ -1324,3 +1324,82 @@ const categories = [
   }
 }
 </style>
+
+<style>
+/* 首页统一封面卡片网格 */
+.latest-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  column-count: unset !important;
+  gap: 22px !important;
+  align-items: stretch;
+}
+
+.latest-post {
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 0 !important;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+  border: 1px solid #E5EDF1;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(60, 85, 100, .045);
+}
+
+.latest-cover {
+  width: 100%;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  flex: none;
+}
+
+.latest-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 16px 18px 17px;
+}
+
+.latest-main {
+  flex: 1;
+  padding: 16px 0 !important;
+}
+
+.latest-main h2 {
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.latest-main p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.latest-card-top {
+  padding-bottom: 10px;
+}
+
+.latest-card-bottom {
+  margin-top: auto;
+}
+
+@media (max-width: 1050px) {
+  .latest-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .latest-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
