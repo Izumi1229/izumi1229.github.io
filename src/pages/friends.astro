@@ -49,11 +49,11 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
           </div>
           <div class="info-row">
             <span>网址</span>
-            <code>https://izumi1229.github.io/</code>
+            <a class="exchange-link" href=" " target="_blank" rel="noopener noreferrer">https://izumi1229.github.io/</a >
           </div>
           <div class="info-row">
             <span>头像</span>
-            <code>https://izumi1229.github.io/images/favicon.png</code>
+            <a class="exchange-link" href="https://izumi1229.github.io/images/favicon.png" target="_blank" rel="noopener noreferrer">https://izumi1229.github.io/images/favicon.png</a >
           </div>
         </div>
       </div>
@@ -361,6 +361,21 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     .info-row {
       gap: 8px;
     }
+  }
+\n
+  .exchange-link {
+    color: #5F91B0;
+    font-family: monospace;
+    font-size: 12px;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    user-select: all;
+    transition: color 0.2s ease;
+  }
+
+  .exchange-link:hover {
+    color: #35495E;
+    text-decoration: underline;
   }
 \n</style>
 
