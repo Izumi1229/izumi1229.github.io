@@ -143,10 +143,7 @@ const category =
 
       </article>
 
-      <aside class="floating-toc" id="floating-toc">
-        <div class="floating-toc-title">ON THIS PAGE</div>
-        <nav class="floating-toc-list" aria-label="章节导航"></nav>
-      </aside>
+
 
       <nav class="post-navigation" aria-label="文章导航">
         {prevPost ? (
@@ -197,6 +194,12 @@ const category =
       </footer>
       </div>
 
+    
+      <aside class="floating-toc" id="floating-toc">
+        <div class="floating-toc-title">ON THIS PAGE</div>
+        <nav class="floating-toc-list" aria-label="章节导航"></nav>
+      </aside>
+
     </main>
     <script>
     document.querySelectorAll(".content img").forEach((img) => {
@@ -215,21 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sideList = floating?.querySelector(".floating-toc-list");
 
   if (!content || !floating || !sideList) return;
-
-  document.body.appendChild(floating);
-
-  Object.assign(floating.style, {
-    position: "fixed",
-    top: "220px",
-    right: "28px",
-    left: "auto",
-    width: "220px",
-    maxHeight: "calc(100vh - 240px)",
-    overflowY: "auto",
-    zIndex: "999999",
-    display: "block",
-    transform: "none"
-  });
 
   const headings = Array.from(content.querySelectorAll("h2, h3"));
   if (!headings.length) {
@@ -375,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
     margin: 0 auto;
     padding: 45px 0;
     display: grid;
-    grid-template-columns: 180px minmax(0, 1fr);
+    grid-template-columns: 180px minmax(0, 1fr) 220px;
     gap: 55px;
   }
 
@@ -1043,6 +1031,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
 @media (max-width: 1100px) {
   body > #floating-toc {
+    display: none !important;
+  }
+}
+</style>
+
+
+<style is:global>
+@media (min-width: 1101px) {
+  .page {
+    grid-template-columns: 180px minmax(0, 1fr) 220px !important;
+    gap: 40px !important;
+    align-items: start;
+  }
+
+  body .floating-toc {
+    position: sticky !important;
+    top: 45px !important;
+    left: auto !important;
+    right: auto !important;
+    align-self: start !important;
+    width: 220px !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    display: block !important;
+    transform: none !important;
+    z-index: 20 !important;
+    margin-top: 45px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  body .floating-toc {
     display: none !important;
   }
 }
