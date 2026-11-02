@@ -1,0 +1,402 @@
+---
+import Sidebar from "../components/Sidebar.astro";
+import PageLoader from "../components/PageLoader.astro";
+import friends from "../data/friends.json";
+import FloatingTanghulu from "../components/FloatingTanghulu.astro";
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <title>FRIENDS / IZUMI'S BLOG</title>
+</head>
+
+<body>
+  <PageLoader />
+    <FloatingTanghulu />
+
+  <main class="page">
+    <Sidebar />
+
+    <div class="friends-main">
+      <p class="eyebrow">FRIENDS / 01</p>
+
+    <h1>友情链接</h1>
+
+    <section class="exchange-card">
+      <div class="exchange-intro">
+        <p class="exchange-label">FRIENDSHIP / LINK EXCHANGE</p >
+        <h2>欢迎交换友链 ♡</h2>
+        <p>欢迎在评论区交换友链！以下是本站的信息，可以参考格式：</p >
+      </div>
+
+      <div class="exchange-info">
+        <img
+          class="exchange-avatar"
+          src="/images/favicon.png"
+          alt="IZUMI 博客头像"
+        />
+        <div class="exchange-details">
+          <div class="info-row">
+            <span>名称</span>
+            <strong>洋柿子糖葫芦</strong>
+          </div>
+          <div class="info-row">
+            <span>简介</span>
+            <strong>一颗酸酸甜甜的赛博糖葫芦</strong>
+          </div>
+          <div class="info-row">
+            <span>网址</span>
+            <a class="exchange-link" href=" " target="_blank" rel="noopener noreferrer">https://izumi1229.github.io/</a >
+          </div>
+          <div class="info-row">
+            <span>头像</span>
+            <a class="exchange-link" href="https://izumi1229.github.io/images/favicon.png" target="_blank" rel="noopener noreferrer">https://izumi1229.github.io/images/favicon.png</a >
+          </div>
+        </div>
+      </div>
+    </section>
+
+{friends.length === 0 ? (
+  <div class="empty">
+    <p>这里暂时还没有友链。</p>
+    <span>以后再慢慢认识新的朋友吧 ♡</span>
+  </div>
+) : (
+  <div class="friends-list">
+    {friends.map((friend) => (
+      <a href={friend.url} class="friend" target="_blank" rel="noopener noreferrer">
+        <div>
+          <h2>{friend.name}</h2>
+          <p>{friend.description}</p>
+        </div>
+        <span>↗</span>
+      </a>
+    ))}
+  </div>
+)}
+      <footer class="site-footer">
+        <p>This blog is live for <span id="blog-live-time">0 days, 0 hours, 0 mins</span> and counting.</p>
+        <p>Copyright © 2026 IZUMI · 糖葫芦</p>
+      </footer>
+    </div>
+  </main>
+
+</body>
+</html>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: #F8FCFB;
+    color: #35495E;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "PingFang SC", "Hiragino Sans GB", sans-serif;
+  }
+
+  header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    color: #35495E;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  nav {
+    display: flex;
+    gap: 28px;
+  }
+
+  nav a {
+    color: #35495E;
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  nav a:hover {
+    color: #7CB1D2;
+  }
+
+  .page {
+    width: min(1400px, calc(100% - 60px));
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 45px 0;
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 55px;
+  }
+
+  .friends-main {
+    min-width: 0;
+    min-height: calc(100vh - 90px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-footer {
+    margin-top: auto;
+    padding-top: 25px;
+    border-top: 1px solid #35495E;
+    display: flex;
+    justify-content: space-between;
+    font-family: monospace;
+    font-size: 12px;
+    color: #849A98;
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  .eyebrow {
+    margin: 0 0 18px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
+  h1 {
+    margin: 0 0 55px;
+    font-size: 42px;
+    font-weight: 500;
+    letter-spacing: -0.05em;
+  }
+ .friends-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.friend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 90px;
+  padding: 18px;
+  border: 1px solid #CDEBE8;
+  border-radius: 10px;
+  color: #35495E;
+  text-decoration: none;
+  background: rgba(247, 252, 251, 0.72);
+  box-shadow: 0 4px 18px rgba(121, 201, 195, 0.08);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.friend:hover {
+  transform: translateY(-3px);
+  border-color: #79C9C3;
+  background: rgba(241, 250, 248, 0.82);
+}
+
+.friend h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.friend p {
+  margin: 0;
+  color: #71808C;
+  font-size: 14px;
+}
+
+.friend > span {
+  color: #FFA62B;
+  font-size: 20px;
+}
+
+.friend:hover h2 {
+  color: #7CB1D2;
+}
+
+  .empty {
+    padding: 55px 10px;
+    border-top: 1px solid #D6E8EF;
+    border-bottom: 1px solid #D6E8EF;
+  }
+
+  .empty p {
+    margin: 0 0 12px;
+    font-size: 18px;
+    color: #35495E;
+  }
+
+  .empty span {
+    color: #71808C;
+    font-size: 14px;
+  }
+
+  @media (max-width: 700px) {
+    .page {
+      width: calc(100% - 40px);
+      padding: 30px 0;
+      grid-template-columns: 1fr;
+      gap: 35px;
+    }
+
+    .friends-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .exchange-card {
+    margin: -25px 0 42px;
+    padding: 25px 28px;
+    border: 1px solid #CFE3EF;
+    border-radius: 12px;
+    background: rgba(207, 227, 239, 0.18);
+  }
+
+  .exchange-intro {
+    margin-bottom: 22px;
+  }
+
+  .exchange-label {
+    margin: 0 0 10px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .exchange-intro h2 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .exchange-intro > p:last-child {
+    margin: 0;
+    color: #71808C;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .exchange-info {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding-top: 20px;
+    border-top: 1px solid #D6E8EF;
+  }
+
+  .exchange-avatar {
+    width: 76px;
+    height: 76px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid #CFE3EF;
+  }
+
+  .exchange-details {
+    min-width: 0;
+    display: grid;
+    gap: 12px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+
+  .info-row > span {
+    width: 32px;
+    flex-shrink: 0;
+    color: #849A98;
+  }
+
+  .info-row strong {
+    font-weight: 500;
+  }
+
+  .info-row code {
+    color: #5F91B0;
+    font-family: monospace;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+    user-select: all;
+    cursor: text;
+  }
+
+  @media (max-width: 700px) {
+    .exchange-card {
+      margin-top: -25px;
+      padding: 20px;
+    }
+
+    .exchange-info {
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .exchange-avatar {
+      width: 60px;
+      height: 60px;
+    }
+
+    .info-row {
+      gap: 8px;
+    }
+  }
+\n
+  .exchange-link {
+    color: #5F91B0;
+    font-family: monospace;
+    font-size: 12px;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    user-select: all;
+    transition: color 0.2s ease;
+  }
+
+  .exchange-link:hover {
+    color: #35495E;
+    text-decoration: underline;
+  }
+\n</style>
+
+
+<script>
+  const blogStart = new Date("2026-10-03T00:00:00+08:00");
+  const liveTime = document.querySelector("#blog-live-time");
+
+  function updateBlogLiveTime() {
+    if (!liveTime) return;
+
+    const diff = Date.now() - blogStart.getTime();
+    const totalMinutes = Math.floor(diff / 60000);
+
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    liveTime.textContent = `${days} days, ${hours} hours, ${minutes} mins`;
+  }
+
+  updateBlogLiveTime();
+  setInterval(updateBlogLiveTime, 60000);
+</script>
