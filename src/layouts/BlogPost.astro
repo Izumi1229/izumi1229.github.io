@@ -216,51 +216,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!content || !floating || !sideList) return;
 
-  // 将目录移到 body 下，彻底脱离文章容器
   document.body.appendChild(floating);
 
-  // 强制固定在浏览器视口右侧
   Object.assign(floating.style, {
     position: "fixed",
-    top: "190px",
+    top: "220px",
     right: "28px",
     left: "auto",
     width: "220px",
-    maxHeight: "calc(100vh - 210px)",
+    maxHeight: "calc(100vh - 240px)",
     overflowY: "auto",
-    zIndex: "99999"
+    zIndex: "999999",
+    display: "block",
+    transform: "none"
   });
 
-
   const headings = Array.from(content.querySelectorAll("h2, h3"));
-
   if (!headings.length) {
     floating.hidden = true;
     return;
   }
 
-  const usedIds = new Set();
   let h2Count = 0;
   let h3Count = 0;
+  const usedIds = new Set();
 
   headings.forEach((heading, index) => {
-    if (!heading.id) {
-      heading.id = "article-section-" + (index + 1);
-    }
+    if (!heading.id) heading.id = "article-section-" + (index + 1);
 
     let id = heading.id;
     let suffix = 2;
-
-    while (usedIds.has(id)) {
-      id = heading.id + "-" + suffix++;
-    }
-
+    while (usedIds.has(id)) id = heading.id + "-" + suffix++;
     heading.id = id;
     usedIds.add(id);
-    heading.classList.add("toc-target");
 
     let number;
-
     if (heading.tagName === "H2") {
       h2Count++;
       h3Count = 0;
@@ -273,39 +263,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const link = document.createElement("a");
     link.href = "#" + heading.id;
     link.textContent = number + " " + heading.textContent.trim();
-    link.className = heading.tagName.toLowerCase() === "h3"
-      ? "toc-link toc-h3"
-      : "toc-link";
+    link.className = heading.tagName === "H3" ? "toc-link toc-h3" : "toc-link";
 
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      heading.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+      heading.scrollIntoView({ behavior: "smooth", block: "start" });
       history.replaceState(null, "", "#" + heading.id);
     });
 
     sideList.appendChild(link);
   });
 
-  const sideLinks = Array.from(sideList.querySelectorAll("a"));
-
+  const links = Array.from(sideList.querySelectorAll("a"));
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-
-      sideLinks.forEach((link) => {
-        link.classList.toggle(
-          "active",
-          link.getAttribute("href") === "#" + entry.target.id
-        );
+      links.forEach((link) => {
+        link.classList.toggle("active", link.hash === "#" + entry.target.id);
       });
     });
-  }, {
-    rootMargin: "-15% 0px -75% 0px",
-    threshold: 0
-  });
+  }, { rootMargin: "-15% 0px -75% 0px" });
 
   headings.forEach((heading) => observer.observe(heading));
 });
@@ -1044,38 +1021,28 @@ document.addEventListener("DOMContentLoaded", () => {
 </style>
 
 
-<style is:global>
-/* ===== Fixed floating article navigation ===== */
 
+
+<style is:global>
 @media (min-width: 1101px) {
-  .floating-toc {
+  body > #floating-toc {
     display: block !important;
     position: fixed !important;
-
-    top: 190px !important;
+    top: 220px !important;
     right: 28px !important;
     left: auto !important;
-
+    bottom: auto !important;
     width: 220px !important;
-    max-height: calc(100vh - 120px) !important;
-
+    max-height: calc(100vh - 240px) !important;
     overflow-y: auto !important;
-    overflow-x: hidden;
-
-    padding: 12px 15px !important;
-    box-sizing: border-box;
-
+    transform: none !important;
+    z-index: 999999 !important;
     background: rgba(248, 252, 251, 0.96) !important;
-    border-left: 2px solid #CFE3EF !important;
-
-    z-index: 1000 !important;
-    scrollbar-width: thin;
-    scrollbar-color: #CFE3EF transparent;
   }
 }
 
 @media (max-width: 1100px) {
-  .floating-toc {
+  body > #floating-toc {
     display: none !important;
   }
 }
