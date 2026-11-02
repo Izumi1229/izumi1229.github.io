@@ -271,37 +271,40 @@ document.addEventListener("DOMContentLoaded", () => {
   let ticking = false;
 
   function updateActiveHeading() {
-    const threshold = window.innerHeight * 0.28;
-    let currentHeading = headings[0];
+    const scrollPosition =
+      window.scrollY + window.innerHeight * 0.30;
 
-    for (const heading of headings) {
-      if (heading.getBoundingClientRect().top <= threshold) {
-        currentHeading = heading;
-      } else {
-        break;
+    let currentIndex = 0;
+
+    headings.forEach((heading, index) => {
+      const headingPosition =
+        heading.getBoundingClientRect().top + window.scrollY;
+
+      if (headingPosition <= scrollPosition) {
+        currentIndex = index;
       }
-    }
+    });
 
-    links.forEach((link) => {
-      link.classList.toggle(
-        "active",
-        link.hash === "#" + currentHeading.id
-      );
+    links.forEach((link, index) => {
+      link.classList.toggle("active", index === currentIndex);
     });
 
     ticking = false;
   }
 
   function requestUpdate() {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(updateActiveHeading);
-    }
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(updateActiveHeading);
   }
 
   window.addEventListener("scroll", requestUpdate, { passive: true });
-  document.addEventListener("scroll", requestUpdate, { passive: true, capture: true });
   window.addEventListener("resize", requestUpdate);
+  window.addEventListener("load", requestUpdate);
+
+  // 兼容部分页面滚动事件未及时触发的情况
+  const tocTimer = window.setInterval(updateActiveHeading, 200);
+
   updateActiveHeading();
 });
 </script>
