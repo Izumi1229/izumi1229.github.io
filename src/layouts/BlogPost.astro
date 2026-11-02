@@ -209,112 +209,91 @@ const category =
     });
   </script>
   <script is:inline>
-    document.addEventListener("DOMContentLoaded", () => {
-      const content = document.querySelector(".content");
-      const toc = document.querySelector("#article-toc");
-      const floating = document.querySelector("#floating-toc");
+document.addEventListener("DOMContentLoaded", () => {
+  const content = document.querySelector(".content");
+  const floating = document.querySelector("#floating-toc");
+  const sideList = floating?.querySelector(".floating-toc-list");
 
-      if (!content || !toc || !floating) return;
+  if (!content || !floating || !sideList) return;
 
-      const headings = Array.from(
-        content.querySelectorAll("h2, h3")
-      );
+  const headings = Array.from(content.querySelectorAll("h2, h3"));
 
-      if (!headings.length) {
-        toc.hidden = true;
-        floating.hidden = true;
-        return;
-      }
+  if (!headings.length) {
+    floating.hidden = true;
+    return;
+  }
 
-      const usedIds = new Set();
+  const usedIds = new Set();
+  let h2Count = 0;
+  let h3Count = 0;
 
-      headings.forEach((heading, index) => {
-        if (!heading.id) {
-          heading.id = "article-section-" + (index + 1);
-        }
+  headings.forEach((heading, index) => {
+    if (!heading.id) {
+      heading.id = "article-section-" + (index + 1);
+    }
 
-        let id = heading.id;
-        let suffix = 2;
+    let id = heading.id;
+    let suffix = 2;
 
-        while (usedIds.has(id)) {
-          id = heading.id + "-" + suffix++;
-        }
+    while (usedIds.has(id)) {
+      id = heading.id + "-" + suffix++;
+    }
 
-        heading.id = id;
-        usedIds.add(id);
-        heading.classList.add("toc-target");
+    heading.id = id;
+    usedIds.add(id);
+    heading.classList.add("toc-target");
+
+    let number;
+
+    if (heading.tagName === "H2") {
+      h2Count++;
+      h3Count = 0;
+      number = h2Count + ".";
+    } else {
+      h3Count++;
+      number = h2Count + "." + h3Count + ".";
+    }
+
+    const link = document.createElement("a");
+    link.href = "#" + heading.id;
+    link.textContent = number + " " + heading.textContent.trim();
+    link.className = heading.tagName.toLowerCase() === "h3"
+      ? "toc-link toc-h3"
+      : "toc-link";
+
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      heading.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
       });
-
-      const topList = toc.querySelector(".toc-list");
-      const sideList = floating.querySelector(".floating-toc-list");
-
-      let h2Count = 0;
-      let h3Count = 0;
-
-      headings.forEach((heading) => {
-        let number = "";
-
-        if (heading.tagName === "H2") {
-          h2Count++;
-          h3Count = 0;
-          number = h2Count + ".";
-        } else {
-          h3Count++;
-          number = h2Count + "." + h3Count + ".";
-        }
-
-        sideList && (() => {
-          const link = document.createElement("a");
-          link.href = "#" + heading.id;
-          link.textContent = number + " " + heading.textContent.trim();
-          link.className = heading.tagName.toLowerCase() === "h3"
-            ? "toc-link toc-h3"
-            : "toc-link";
-
-          link.addEventListener("click", (event) => {
-            event.preventDefault();
-            heading.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-            history.replaceState(null, "", "#" + heading.id);
-          });
-
-          sideList.appendChild(link);
-        })();
-      });
-
-      const toggle = toc.querySelector(".toc-heading");
-      const sideLinks = Array.from(sideList.querySelectorAll("a"));
-
-      toggle.addEventListener("click", () => {
-        const expanded = toggle.getAttribute("aria-expanded") === "true";
-        toggle.setAttribute("aria-expanded", String(!expanded));
-        topList.hidden = expanded;
-        toggle.querySelector(".toc-toggle").textContent = expanded ? "+" : "−";
-      });
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-
-          const index = headings.indexOf(entry.target);
-
-          sideLinks.forEach((link) => {
-            link.classList.toggle(
-              "active",
-              link.getAttribute("href") === "#" + entry.target.id
-            );
-          });
-        });
-      }, {
-        rootMargin: "-15% 0px -75% 0px",
-        threshold: 0
-      });
-
-      headings.forEach((heading) => observer.observe(heading));
+      history.replaceState(null, "", "#" + heading.id);
     });
-  </script>
+
+    sideList.appendChild(link);
+  });
+
+  const sideLinks = Array.from(sideList.querySelectorAll("a"));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+
+      sideLinks.forEach((link) => {
+        link.classList.toggle(
+          "active",
+          link.getAttribute("href") === "#" + entry.target.id
+        );
+      });
+    });
+  }, {
+    rootMargin: "-15% 0px -75% 0px",
+    threshold: 0
+  });
+
+  headings.forEach((heading) => observer.observe(heading));
+});
+</script>
 </body>
 </html>
 
@@ -1044,6 +1023,29 @@ const category =
 @media (max-width: 700px) {
   .article-toc {
     margin-bottom: 32px !important;
+  }
+}
+</style>
+
+
+<style is:global>
+@media (min-width: 1101px) {
+  .floating-toc {
+    display: block !important;
+    position: fixed !important;
+    top: 18% !important;
+    right: 28px !important;
+    left: auto !important;
+    width: 220px !important;
+    max-height: 65vh;
+    overflow-y: auto;
+    z-index: 100;
+  }
+}
+
+@media (max-width: 1100px) {
+  .floating-toc {
+    display: none !important;
   }
 }
 </style>
