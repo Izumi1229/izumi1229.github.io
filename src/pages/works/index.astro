@@ -973,3 +973,77 @@ function getExcerpt(post) {
     margin-bottom: 22px;
   }
 </style>
+
+<style>
+  /* works 页面：紧凑型上下封面卡片 */
+  .works-main .posts .post {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin-bottom: 16px;
+    border-radius: 10px;
+  }
+
+  .works-main .posts .post-cover {
+    flex: none;
+    width: 100%;
+    height: 150px;
+  }
+
+  .works-main .posts .post-info {
+    padding: 13px 14px 14px;
+    gap: 8px;
+  }
+
+  .works-main .posts .post-date {
+    font-size: 11px;
+  }
+
+  .works-main .posts .post-main h2 {
+    margin-bottom: 6px;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+
+  .works-main .posts .post-main p {
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .works-main .posts .post-main .post-excerpt {
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .works-main .posts .post-card-bottom {
+    padding-top: 9px;
+    font-size: 11px;
+  }
+
+  @media (max-width: 1050px) {
+    .works-main .posts .post-cover {
+      height: 135px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .works-main .posts .post-cover {
+      height: 125px;
+    }
+
+    .works-main .posts .post-info {
+      padding: 10px;
+    }
+
+    .works-main .posts .post-main h2 {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .works-main .posts .post-cover {
+      height: 165px;
+    }
+  }
+</style>
