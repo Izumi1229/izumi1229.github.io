@@ -182,80 +182,65 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     margin: 0 0 55px;
     font-size: 42px;
     font-weight: 500;
-    letter-spaci  .friends-list {
+    letter-spaci    .friends-list {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 45px;
+    row-gap: 38px;
+    padding: 8px 0 35px;
   }
 
   .friend {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    gap: 13px;
     min-width: 0;
-    min-height: 48px;
-    padding: 6px 8px;
-    border: 1px solid #DCEBF0;
-    border-radius: 8px;
-    color: #35495E;
+    color: inherit;
     text-decoration: none;
-    background: rgba(247, 252, 251, 0.72);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    transition: opacity 0.2s ease;
+  }
+
+  .friend:link,
+  .friend:visited {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .friend:hover {
+    opacity: 0.72;
   }
 
   .friend-avatar {
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
     object-fit: cover;
-    border-radius: 7px;
-    border: 1px solid #CFE3EF;
+    border-radius: 50%;
   }
 
   .friend-info {
-    flex: 1;
     min-width: 0;
-    margin-left: 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
   }
 
   .friend-info h2 {
-    margin: 0 0 2px;
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.35;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    margin: 0;
+    color: #45BFA5;
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 600;
   }
 
   .friend-info p {
     margin: 0;
-    overflow: hidden;
-    color: #849A98;
-    font-size: 10px;
-    line-height: 1.35;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: #58636B;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
   }
-
-  .friend-arrow {
-    flex-shrink: 0;
-    margin-left: 5px;
-    color: #A8C8D9 !important;
-    font-size: 12px;
-  }
-
-  .friend:hover {
-    transform: translateY(-2px);
-    border-color: #A9D2DF;
-  }
-
-  .friend:hover h2,
-  .friend:hover .friend-arrow {
-    color: #7CB1D2 !important;
-  }
-
-olor: #7CB1D2;
-}
 
   .empty {
     padding: 55px 10px;
