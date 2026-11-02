@@ -46,6 +46,11 @@
             <span>DESCRIPTION</span>
             <input id="friendDescription" type="text" placeholder="简单介绍一下这个网站" />
           </label>
+
+          <label class="full">
+            <span>AVATAR URL</span>
+            <input id="friendAvatar" type="url" placeholder="头像图片地址（可留空使用默认头像）" />
+          </label>
         </div>
 
         <div class="actions">
@@ -75,6 +80,7 @@
       const nameInput = document.querySelector("#friendName");
       const urlInput = document.querySelector("#friendUrl");
       const descriptionInput = document.querySelector("#friendDescription");
+      const avatarInput = document.querySelector("#friendAvatar");
       const addButton = document.querySelector("#addButton");
       const message = document.querySelector("#message");
       const list = document.querySelector("#friends-list");
@@ -157,6 +163,7 @@
         const name = nameInput.value.trim();
         const url = urlInput.value.trim();
         const description = descriptionInput.value.trim();
+        const avatar = avatarInput.value.trim();
 
         if (!name || !url) {
           alert("请填写名字和 URL。");
@@ -177,6 +184,7 @@
               name,
               url,
               description,
+              avatar,
             }),
           });
 
@@ -188,6 +196,7 @@
             nameInput.value = "";
             urlInput.value = "";
             descriptionInput.value = "";
+            avatarInput.value = "";
 
             loadFriends();
           } else {

@@ -67,7 +67,7 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
 ) : (
   <div class="friends-list">
     {friends.map((friend) => (
-      <a href= "friend" target="_blank" rel="noopener noreferrer">
+      <a class="friend" href={friend.url} target="_blank" rel="noopener noreferrer">
         <img
           class="friend-avatar"
           src={friend.avatar || "/images/favicon.png"}
@@ -182,98 +182,79 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     margin: 0 0 55px;
     font-size: 42px;
     font-weight: 500;
-    letter-spacing: -0.05em;
+    letter-spaci  .friends-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
- .friends-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
 
-.friend {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 90px;
-  padding: 18px;
-  border: 1px solid #CDEBE8;
-  border-radius: 10px;
-  color: #35495E;
-  text-decoration: none;
-  background: rgba(247, 252, 251, 0.72);
-  box-shadow: 0 4px 18px rgba(121, 201, 195, 0.08);
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease;
-}
+  .friend {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 48px;
+    padding: 6px 8px;
+    border: 1px solid #DCEBF0;
+    border-radius: 8px;
+    color: #35495E;
+    text-decoration: none;
+    background: rgba(247, 252, 251, 0.72);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
 
+  .friend-avatar {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    object-fit: cover;
+    border-radius: 7px;
+    border: 1px solid #CFE3EF;
+  }
 
-.friend-avatar {
-  width: 56px;
-  height: 56px;
-  flex-shrink: 0;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid #CFE3EF;
-}
+  .friend-info {
+    flex: 1;
+    min-width: 0;
+    margin-left: 7px;
+  }
 
-.friend-info {
-  flex: 1;
-  min-width: 0;
-  margin-left: 16px;
-}
+  .friend-info h2 {
+    margin: 0 0 2px;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.friend-info h2 {
-  margin: 0 0 8px;
-  font-size: 17px;
-  font-weight: 500;
-}
+  .friend-info p {
+    margin: 0;
+    overflow: hidden;
+    color: #849A98;
+    font-size: 10px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.friend-info p {
-  margin: 0;
-  color: #71808C;
-  font-size: 13px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
+  .friend-arrow {
+    flex-shrink: 0;
+    margin-left: 5px;
+    color: #A8C8D9 !important;
+    font-size: 12px;
+  }
 
-.friend-arrow {
-  flex-shrink: 0;
-  margin-left: 12px;
-  color: #A8C8D9 !important;
-  font-size: 18px;
-}
+  .friend:hover {
+    transform: translateY(-2px);
+    border-color: #A9D2DF;
+  }
 
-.friend:hover .friend-arrow {
-  color: #7CB1D2 !important;
-}
+  .friend:hover h2,
+  .friend:hover .friend-arrow {
+    color: #7CB1D2 !important;
+  }
 
-.friend:hover {
-  transform: translateY(-3px);
-  border-color: #79C9C3;
-  background: rgba(241, 250, 248, 0.82);
-}
-
-.friend h2 {
-  margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.friend p {
-  margin: 0;
-  color: #71808C;
-  font-size: 14px;
-}
-
-.friend > span {
-  color: #FFA62B;
-  font-size: 20px;
-}
-
-.friend:hover h2 {
-  color: #7CB1D2;
+olor: #7CB1D2;
 }
 
   .empty {
@@ -303,6 +284,7 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
 
     .friends-list {
       grid-template-columns: 1fr;
+      gap: 7px;
     }
   }
 

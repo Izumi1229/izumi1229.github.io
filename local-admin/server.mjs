@@ -991,6 +991,7 @@ ${String(data.content || "")}
             name: String(data.name).trim(),
             url: String(data.url).trim(),
             description: String(data.description || "").trim(),
+            avatar: String(data.avatar || "/images/favicon.png").trim(),
           });
 
           await fs.writeFile(
