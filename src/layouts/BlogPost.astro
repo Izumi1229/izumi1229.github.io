@@ -1029,17 +1029,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <style is:global>
+/* ===== Fixed floating article navigation ===== */
+
 @media (min-width: 1101px) {
   .floating-toc {
     display: block !important;
     position: fixed !important;
-    top: 18% !important;
+
+    top: 90px !important;
     right: 28px !important;
     left: auto !important;
+
     width: 220px !important;
-    max-height: 65vh;
-    overflow-y: auto;
-    z-index: 100;
+    max-height: calc(100vh - 120px) !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden;
+
+    padding: 12px 15px !important;
+    box-sizing: border-box;
+
+    background: rgba(248, 252, 251, 0.96) !important;
+    border-left: 2px solid #CFE3EF !important;
+
+    z-index: 1000 !important;
+    scrollbar-width: thin;
+    scrollbar-color: #CFE3EF transparent;
   }
 }
 
