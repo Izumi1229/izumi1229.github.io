@@ -216,8 +216,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!content || !floating || !sideList) return;
 
-  // 将目录移出文章容器，避免父级 transform 影响 fixed 定位
+  // 将目录移到 body 下，彻底脱离文章容器
   document.body.appendChild(floating);
+
+  // 强制固定在浏览器视口右侧
+  Object.assign(floating.style, {
+    position: "fixed",
+    top: "190px",
+    right: "28px",
+    left: "auto",
+    width: "220px",
+    maxHeight: "calc(100vh - 210px)",
+    overflowY: "auto",
+    zIndex: "99999"
+  });
 
 
   const headings = Array.from(content.querySelectorAll("h2, h3"));
