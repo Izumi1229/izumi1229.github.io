@@ -216,6 +216,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!content || !floating || !sideList) return;
 
+  // 将目录移出文章容器，避免父级 transform 影响 fixed 定位
+  document.body.appendChild(floating);
+
+
   const headings = Array.from(content.querySelectorAll("h2, h3"));
 
   if (!headings.length) {
@@ -1036,7 +1040,7 @@ document.addEventListener("DOMContentLoaded", () => {
     display: block !important;
     position: fixed !important;
 
-    top: 160px !important;
+    top: 190px !important;
     right: 28px !important;
     left: auto !important;
 
