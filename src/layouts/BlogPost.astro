@@ -117,6 +117,14 @@ const category =
 
         <div class="line"></div>
 
+        <section class="article-toc" id="article-toc">
+          <button class="toc-heading" type="button" aria-expanded="true">
+            <span>CONTENTS / 文章目录</span>
+            <span class="toc-toggle">−</span>
+          </button>
+          <nav class="toc-list" aria-label="文章目录"></nav>
+        </section>
+
         <div class="content">
           <slot />
         </div>
@@ -142,6 +150,11 @@ const category =
         </section>
 
       </article>
+
+      <aside class="floating-toc" id="floating-toc">
+        <div class="floating-toc-title">ON THIS PAGE</div>
+        <nav class="floating-toc-list" aria-label="章节导航"></nav>
+      </aside>
 
       <nav class="post-navigation" aria-label="文章导航">
         {prevPost ? (
@@ -201,6 +214,100 @@ const category =
 
     document.querySelectorAll(".content video").forEach((video) => {
       video.preload = "metadata";
+    });
+  </script>
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+      const content = document.querySelector(".content");
+      const toc = document.querySelector("#article-toc");
+      const floating = document.querySelector("#floating-toc");
+
+      if (!content || !toc || !floating) return;
+
+      const headings = Array.from(
+        content.querySelectorAll("h2, h3")
+      );
+
+      if (!headings.length) {
+        toc.hidden = true;
+        floating.hidden = true;
+        return;
+      }
+
+      const usedIds = new Set();
+
+      headings.forEach((heading, index) => {
+        if (!heading.id) {
+          heading.id = "article-section-" + (index + 1);
+        }
+
+        let id = heading.id;
+        let suffix = 2;
+
+        while (usedIds.has(id)) {
+          id = heading.id + "-" + suffix++;
+        }
+
+        heading.id = id;
+        usedIds.add(id);
+        heading.classList.add("toc-target");
+      });
+
+      const topList = toc.querySelector(".toc-list");
+      const sideList = floating.querySelector(".floating-toc-list");
+
+      headings.forEach((heading) => {
+        [topList, sideList].forEach((list) => {
+          const link = document.createElement("a");
+          link.href = "#" + heading.id;
+          link.textContent = heading.textContent.trim();
+          link.className = heading.tagName.toLowerCase() === "h3"
+            ? "toc-link toc-h3"
+            : "toc-link";
+
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            heading.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+            history.replaceState(null, "", "#" + heading.id);
+          });
+
+          list.appendChild(link);
+        });
+      });
+
+      const toggle = toc.querySelector(".toc-heading");
+      const topLinks = Array.from(topList.querySelectorAll("a"));
+      const sideLinks = Array.from(sideList.querySelectorAll("a"));
+
+      toggle.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        topList.hidden = expanded;
+        toggle.querySelector(".toc-toggle").textContent = expanded ? "+" : "−";
+      });
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const index = headings.indexOf(entry.target);
+
+          [...topLinks, ...sideLinks].forEach((link) => {
+            link.classList.toggle(
+              "active",
+              link.getAttribute("href") === "#" + entry.target.id
+            );
+          });
+        });
+      }, {
+        rootMargin: "-15% 0px -75% 0px",
+        threshold: 0
+      });
+
+      headings.forEach((heading) => observer.observe(heading));
     });
   </script>
 </body>
@@ -649,4 +756,113 @@ const category =
     background: #EEF7FA;
   }
 
-</style>
+
+
+/* ===== Article Table of Contents ===== */
+
+.article-toc {
+  max-width: 700px;
+  margin: 0 0 42px;
+  padding: 17px 20px;
+  border: 1px solid #CFE3EF;
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+}
+
+.toc-heading {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #35495E;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: .06em;
+  cursor: pointer;
+}
+
+.toc-toggle {
+  color: #7CB1D2;
+  font-size: 18px;
+}
+
+.toc-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.toc-link {
+  display: block;
+  color: #536B7D;
+  font-size: 13px;
+  line-height: 1.7;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+
+.toc-link:hover,
+.toc-link.active {
+  color: #7CB1D2;
+}
+
+.toc-link.active {
+  font-weight: 600;
+}
+
+.toc-h3 {
+  padding-left: 18px;
+  font-size: 12px;
+  color: #849A98;
+}
+
+.floating-toc {
+  position: fixed;
+  top: 115px;
+  left: calc(50% + 520px);
+  width: 190px;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  padding: 15px 14px;
+  border-left: 1px solid #CFE3EF;
+  background: rgba(248,252,251,.92);
+  z-index: 10;
+}
+
+.floating-toc-title {
+  margin-bottom: 15px;
+  color: #849A98;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+
+.floating-toc-list {
+  display: grid;
+  gap: 9px;
+}
+
+.floating-toc .toc-link {
+  font-size: 12px;
+}
+
+.toc-target {
+  scroll-margin-top: 35px;
+}
+
+@media (max-width: 1500px) {
+  .floating-toc {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .article-toc {
+    margin-bottom: 32px;
+    padding: 15px;
+  }
+}
+\n</style>

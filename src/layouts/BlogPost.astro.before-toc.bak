@@ -1,0 +1,652 @@
+---
+import Sidebar from "../components/Sidebar.astro";
+import PageLoader from "../components/PageLoader.astro";
+import FloatingTanghulu from "../components/FloatingTanghulu.astro";
+
+const { title, date, description } = Astro.props;
+
+const path = Astro.url.pathname;
+
+const allPosts = Object.values(
+  import.meta.glob("../pages/*/posts/*.md", {
+    eager: true,
+  })
+);
+
+const sortedPosts = allPosts
+  .map((post) => post)
+  .filter((post) => post?.frontmatter?.date)
+  .sort(
+    (a, b) =>
+      new Date(b.frontmatter.date).getTime() -
+      new Date(a.frontmatter.date).getTime()
+  );
+
+const currentIndex = sortedPosts.findIndex(
+  (post) => post.url === Astro.url.pathname
+);
+
+const prevPost =
+  currentIndex >= 0 ? sortedPosts[currentIndex + 1] : null;
+
+const nextPost =
+  currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+
+const currentPost = allPosts.find(
+  (post) => post.url === Astro.url.pathname
+);
+
+const rawPosts = import.meta.glob("../pages/*/posts/*.md", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+const rawKey = Object.keys(rawPosts).find((key) => {
+  const fileName = key.split("/").pop()?.replace(/\.md$/, "");
+  const urlSlug = decodeURIComponent(
+    Astro.url.pathname
+      .split("/")
+      .filter(Boolean)
+      .pop() || ""
+  );
+
+  return fileName === urlSlug;
+});
+
+const rawContent = rawKey ? rawPosts[rawKey] : "";
+
+const body = rawContent
+  .replace(/^---[\s\S]*?---/, "")
+  .replace(/\s/g, "");
+
+const wordCount = Array.from(body).length;
+
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+
+
+const category =
+  path.startsWith("/travel/")
+    ? "到处乱跑"
+    : path.startsWith("/subtitles/")
+      ? "听写小作坊"
+      : path.startsWith("/works/")
+        ? "书影音游"
+        : "碎碎念";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <title>{title} / IZUMI</title>
+  </head>
+
+  <body>
+  <script>
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const blur = target.closest(".blur-text");
+      if (!blur) return;
+      blur.classList.toggle("revealed");
+    });
+  </script>
+
+
+    <PageLoader />
+    <FloatingTanghulu />
+    <main class="page">
+      <Sidebar />
+
+      <div class="article-main">
+        <article>
+
+        <div class="meta">
+          <span>{category}</span>
+          <span>{date}</span>
+          <span>{readingTime} min read</span>
+        </div>
+
+        <h1>{title}</h1>
+
+        <p class="description">{description}</p>
+
+        <div class="line"></div>
+
+        <div class="content">
+          <slot />
+        </div>
+
+        <section class="comments" aria-label="评论区">
+          <script
+            src="https://giscus.app/client.js"
+            data-repo="izumi1229/izumi1229.github.io"
+            data-repo-id="R_kgDOU5pq2A"
+            data-category="Announcements"
+            data-category-id="DIC_kwDOU5pq2M4DHGGA"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="bottom"
+            data-theme="light"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async
+          ></script>
+        </section>
+
+      </article>
+
+      <nav class="post-navigation" aria-label="文章导航">
+        {prevPost ? (
+          <a href={prevPost.url} class="post-nav prev">
+            <span>← PREV</span>
+            <strong>{prevPost.frontmatter.title}</strong>
+          </a>
+        ) : (
+          <span></span>
+        )}
+
+        {nextPost ? (
+          <a href={nextPost.url} class="post-nav next">
+            <span>NEXT →</span>
+            <strong>{nextPost.frontmatter.title}</strong>
+          </a>
+        ) : (
+          <span></span>
+        )}
+      </nav>
+
+      <a
+        href={
+          category === "到处乱跑"
+            ? "/travel/"
+            : category === "听写小作坊"
+              ? "/subtitles/"
+              : category === "书影音游"
+                ? "/works/"
+                : "/daily/"
+        }
+        class="back"
+      >
+        ← BACK TO {
+          category === "到处乱跑"
+            ? "TRAVEL"
+            : category === "听写小作坊"
+              ? "SUBTITLES"
+              : category === "书影音游"
+                ? "WORKS"
+                : "DAILY"
+        }
+      </a>
+
+        <footer class="site-footer">
+        <p>This blog is live for <span id="blog-live-time">0 days, 0 hours, 0 mins</span> and counting.</p>
+        <p>Copyright © 2026 IZUMI · 糖葫芦</p>
+      </footer>
+      </div>
+
+    </main>
+    <script>
+    document.querySelectorAll(".content img").forEach((img) => {
+      img.loading = "lazy";
+      img.decoding = "async";
+    });
+
+    document.querySelectorAll(".content video").forEach((video) => {
+      video.preload = "metadata";
+    });
+  </script>
+</body>
+</html>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre.astro-code").forEach((block) => {
+      if (block.querySelector(".copy-code")) return;
+
+      const button = document.createElement("button");
+      button.className = "copy-code";
+      button.textContent = "COPY";
+
+      button.addEventListener("click", async () => {
+        const code = block.querySelector("code")?.innerText || "";
+
+        try {
+          await navigator.clipboard.writeText(code);
+          button.textContent = "COPIED";
+
+          setTimeout(() => {
+            button.textContent = "COPY";
+          }, 1500);
+        } catch {
+          button.textContent = "FAILED";
+
+          setTimeout(() => {
+            button.textContent = "COPY";
+          }, 1500);
+        }
+      });
+
+      block.appendChild(button);
+    });
+  });
+</script>
+
+
+<style>
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  :global(body) {
+    position: relative;
+    margin: 0;
+    background: #F8FCFB;
+    animation: pageFadeIn 0.7s ease both;
+    color: #35495E;
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "Helvetica Neue",
+      "PingFang SC",
+      sans-serif;
+  }
+
+
+  :global(body)::after {
+    content: "";
+    position: fixed;
+    right: 35px;
+    bottom: 35px;
+    width: 180px;
+    height: 180px;
+    background: url("/images/akisou-tanghulu.png") center / contain no-repeat;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes pageFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .page {
+    width: min(1400px, calc(100% - 60px));
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 45px 0;
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 55px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #35495E;
+  }
+
+  .logo {
+    color: #35495E;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    transition: color 0.25s ease;
+  }
+
+  .logo:hover {
+    color: #7CB1D2;
+  }
+
+  nav {
+    display: flex;
+    gap: 28px;
+  }
+
+  nav a {
+    color: #35495E;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 13px;
+    transition: color 0.25s ease;
+  }
+
+  nav a:hover,
+  .back:hover {
+    color: #7CB1D2;
+  }
+
+  article {
+    padding: 60px 0 50px;
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  h1 {
+    margin: 35px 0 25px;
+    color: #35495E;
+    font-size: 42px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.06em;
+  }
+
+  .description {
+    margin: 0;
+    color: #849A98;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  .line {
+    margin: 55px 0;
+    border-top: 1px solid #FFA62B;
+  }
+
+  .content {
+    max-width: 700px;
+    color: #35495E;
+    font-size: 17px;
+    line-height: 2;
+  }
+
+  .content :global(h1) {
+    color: #35495E;
+    font-size: 32px;
+    margin: 0 0 30px;
+  }
+
+  .content :global(h3) {
+    margin: 32px 0 14px;
+    padding-left: 12px;
+    border-left: 2px solid #CFE3EF;
+    color: #35495E;
+    font-size: 18px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .content :global(h2) {
+    margin: 60px 0 20px;
+    padding-left: 15px;
+    border-left: 3px solid #7CB1D2;
+    color: #35495E;
+    font-size: 26px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .content :global(p) {
+    margin: 0 0 28px;
+  }
+
+  .content :global(img) {
+    display: block;
+    width: min(100%, 860px);
+    height: auto;
+    max-height: 620px;
+    margin: 42px auto;
+    border-radius: 18px;
+    border: 1px solid #cfe3ef;
+    box-shadow:
+      0 10px 30px rgba(126, 177, 210, 0.12),
+      0 2px 8px rgba(53, 73, 94, 0.05);
+    object-fit: contain;
+  }
+
+  .content :global(video) {
+    display: block;
+    width: min(100%, 860px);
+    height: auto;
+    max-height: 620px;
+    margin: 42px auto;
+    border-radius: 18px;
+    background: #eef7f7;
+    border: 1px solid #cfe3ef;
+    box-shadow:
+      0 10px 30px rgba(126, 177, 210, 0.12),
+      0 2px 8px rgba(53, 73, 94, 0.05);
+    object-fit: contain;
+    overflow: hidden;
+  }
+
+  .content :global(figure) {
+    margin: 40px 0;
+  }
+
+  .content :global(figcaption) {
+    margin-top: -25px;
+    margin-bottom: 40px;
+    color: #849A98;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .content :global(.caption) {
+    display: block !important;
+    margin: -25px 0 40px !important;
+    color: #849A98 !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+  }
+
+  .content :global(.blur-text) {
+    display: inline;
+    color: #849A98;
+    background: rgba(207, 227, 239, 0.35);
+    border-radius: 4px;
+    filter: blur(5px);
+    cursor: pointer;
+    transition: filter 0.25s ease, background 0.25s ease;
+  }
+
+  .content :global(.blur-text:hover),
+  .content :global(.blur-text:focus),
+  .content :global(.blur-text.revealed) {
+    filter: blur(0);
+    background: rgba(207, 227, 239, 0.2);
+    outline: none;
+  }
+
+  .content :global(strong) {
+    color: #35495E;
+    font-weight: 600;
+  }
+
+  .post-navigation {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 10px 0 35px;
+  }
+
+  .post-nav {
+    min-width: 0;
+    padding: 18px 20px;
+    border: 1px solid #CFE3EF;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    color: #35495E;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .post-nav:hover {
+    border-color: #79C9C3;
+    background: rgba(241, 250, 248, 0.82);
+    transform: translateY(-2px);
+  }
+
+  .post-nav span {
+    display: block;
+    margin-bottom: 8px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  .post-nav strong {
+    display: block;
+    overflow: hidden;
+    color: #35495E;
+    font-size: 14px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .post-nav.next {
+    text-align: right;
+  }
+
+  .back {
+    display: inline-block;
+    margin-top: 60px;
+    color: #35495E;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 13px;
+    transition: color 0.25s ease;
+  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 100px;
+    padding-top: 20px;
+    border-top: 1px solid #35495E;
+    font-family: monospace;
+    font-size: 12px;
+    color: #849A98;
+  }
+
+  @media (max-width: 700px) {
+  
+  @keyframes pageFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .page {
+      width: calc(100% - 40px);
+      padding: 30px 0;
+      grid-template-columns: 1fr;
+      gap: 35px;
+    }
+
+    header {
+      align-items: flex-start;
+    }
+
+    nav {
+      gap: 15px;
+    }
+
+    article {
+      padding: 75px 0 30px;
+    }
+
+    .meta {
+      font-size: 11px;
+    }
+
+    .content {
+      font-size: 16px;
+      line-height: 1.9;
+    }
+
+    footer {
+      display: block;
+      line-height: 2;
+    }
+  }
+
+
+  /* code blocks */
+  :global(pre.astro-code) {
+    margin: 28px 0;
+    padding: 18px 20px;
+    overflow-x: auto;
+    background: #F7FBFD !important;
+    border: 1px solid #CFE3EF;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(124, 177, 210, 0.08);
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  :global(pre.astro-code code) {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  :global(:not(pre) > code) {
+    padding: 3px 7px;
+    background: #F7FBFD;
+    border: 1px solid #CFE3EF;
+    border-radius: 6px;
+    color: #7CB1D2;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.9em;
+  }
+
+
+  :global(pre.astro-code) {
+    position: relative;
+  }
+
+  :global(.copy-code) {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 8px;
+    border: 1px solid #CFE3EF;
+    border-radius: 6px;
+    background: #F8FCFB;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, background 0.2s ease;
+  }
+
+  :global(.copy-code:hover) {
+    opacity: 1;
+    background: #EEF7FA;
+  }
+
+</style>
