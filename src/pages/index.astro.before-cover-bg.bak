@@ -1,0 +1,1326 @@
+---
+import PageLoader from "../components/PageLoader.astro";
+import FloatingTanghulu from "../components/FloatingTanghulu.astro";
+const postFiles = import.meta.glob("./{daily,travel,subtitles,works}/posts/*.md", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+const postModules = import.meta.glob("./{daily,travel,subtitles,works}/posts/*.md", {
+  eager: true,
+});
+
+const posts = Object.entries(postModules)
+  .map(([path, post]) => {
+    const raw = postFiles[path] || "";
+
+    const body = raw.replace(/^---[\s\S]*?---/, "").replace(/\s/g, "");
+
+    return {
+      ...post,
+      wordCount: Array.from(body).length,
+    };
+  })
+  .sort((a, b) =>
+    b.frontmatter.date.localeCompare(a.frontmatter.date)
+  );
+
+const writingToday = new Date(
+  new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Shanghai",
+  })
+);
+
+const writingYear = writingToday.getFullYear();
+const writingMonth = writingToday.getMonth() + 1;
+
+const writingDaysInMonth = new Date(
+  writingYear,
+  writingMonth,
+  0
+).getDate();
+
+const writingDaily = {};
+
+posts.forEach((post) => {
+  const rawDate = String(post.frontmatter.date || "").trim();
+  const date = rawDate.replace(/\./g, "-").slice(0, 10);
+
+  if (
+    date.startsWith(
+      `${writingYear}-${String(writingMonth).padStart(2, "0")}-`
+    )
+  ) {
+    writingDaily[date] =
+      (writingDaily[date] || 0) + post.wordCount;
+  }
+});
+
+const writingValues = Object.values(writingDaily);
+
+const writingMaxWords = Math.max(
+  ...writingValues,
+  1
+);
+
+const writingTotalWords = writingValues.reduce(
+  (sum, value) => sum + value,
+  0
+);
+
+const writingDays = writingValues.filter(
+  (value) => value > 0
+).length;
+
+const postsPerPage = 6;
+const currentPage = Number(Astro.url.searchParams.get("page") || "1");
+const totalPages = Math.ceil(posts.length / postsPerPage);
+const startIndex = (currentPage - 1) * postsPerPage;
+const paginatedPosts = posts.slice(startIndex, startIndex + postsPerPage);
+
+const years = [...new Set(posts.map((post) => post.frontmatter.date.slice(0, 4)))];
+
+const categories = [
+  {
+    name: "碎碎念",
+    english: "DAILY LIFE",
+    description: "没什么大事，胡思乱想先放这里。",
+    url: `${import.meta.env.BASE_URL}daily/`,
+  },
+  {
+    name: "到处乱跑",
+    english: "TRAVEL",
+    description: "先出门再说。",
+    url: `${import.meta.env.BASE_URL}travel/`,
+  },
+  {
+    name: "听写小作坊",
+    english: "SUBTITLES",
+    description: "偶尔也怀疑自己的耳朵。",
+    url: `${import.meta.env.BASE_URL}subtitles/`,
+  },
+  {
+    name: "书影音游",
+    english: "WORKS",
+    description: "喜欢什么就往这里丢。",
+    url: `${import.meta.env.BASE_URL}works/`,
+  },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <title>IZUMI'S BLOG</title>
+  </head>
+
+  <body>
+    <PageLoader />
+    <FloatingTanghulu />
+    <main class="page">
+
+      <aside class="sidebar">
+        <a href={import.meta.env.BASE_URL} class="side-logo">
+          <img
+            src={`/images/akisou-tanghulu.png`}
+            alt="糖葫芦头像"
+          />
+          <span>IZUMI'S BLOG</span>
+        </a>
+
+        <section class="side-intro">
+          <p class="hello">HELLO, I'M IZUMI.</p>
+
+          <h1>
+            一颗酸酸甜甜的赛博糖葫芦<br />
+            
+          </h1>
+
+        </section>
+
+        <div class="sidebar-contact">
+
+          <div class="contact-links">
+            <a href="https://xhslink.cn/o/4YKjjKWoeoF" target="_blank" rel="noopener noreferrer" aria-label="小红书">
+              <img src={`/images/akisou-contact1.png`} alt="" />
+            </a>
+
+            <a href="https://b23.tv/2GVGELf" target="_blank" rel="noopener noreferrer" aria-label="哔哩哔哩">
+              <img src={`/images/akisou-contact2.png`} alt="" />
+            </a>
+
+            <a href="https://x.com/mushanbiu?s=11" target="_blank" rel="noopener noreferrer" aria-label="X">
+              <img src={`/images/akisou-contact3.png`} alt="" />
+            </a>
+
+            <a href="/rss.xml" aria-label="RSS">
+              <img src={`/images/akisou-contact4.png`} alt="" />
+            </a>
+          </div>
+        </div>
+
+        <div class="home-clock">
+          <div class="home-clock-label">CLOCK</div>
+          <div class="home-clock-time" id="home-live-time">00:00:00</div>
+          <div class="home-clock-date" id="home-live-date">2026.10.09</div>
+        </div>
+
+        <nav class="side-nav">
+          <a href={import.meta.env.BASE_URL}>HOME｜首页</a>
+          <a href={`${import.meta.env.BASE_URL}about/`}>ABOUT｜关于</a>
+          <a href={`${import.meta.env.BASE_URL}archive/`}>ARCHIVE｜归档</a>
+          <a href={`${import.meta.env.BASE_URL}friends/`}>FRIENDS｜友链</a>
+        </nav>
+
+      </aside>
+
+      <section class="main-column">
+
+        <section class="latest">
+          <div class="search-box">
+            <input
+              type="search"
+              id="post-search"
+              placeholder="Search..."
+              aria-label="搜索文章"
+            />
+            <span>⌕</span>
+          </div>
+
+          <div class="section-title">
+            <span>LATEST</span>
+            <span>{posts.length.toString().padStart(2, "0")}</span>
+          </div>
+
+          <div class="latest-grid">
+            {paginatedPosts.map((post) => (
+              <a href={`${post.url}`} class="latest-post">
+                <div class="latest-card-content">
+                  <div class="latest-card-top">
+                    <span>ARTICLE</span>
+                    <span>↗</span>
+                  </div>
+
+                  <div class="latest-main">
+                    <h2>{post.frontmatter.title}</h2>
+                    <p>{post.frontmatter.description}</p>
+                  </div>
+
+                  <div class="latest-card-bottom">
+                    <span class="latest-category">{
+                      ({
+                        "日常": "碎碎念",
+                        "旅行": "到处乱跑",
+                        "字幕": "听写小作坊",
+                        "作品分享": "书影音游",
+                      }[post.frontmatter.category] || post.frontmatter.category || "BLOG")
+                    }</span>
+                    <span class="latest-post-meta">
+                      {post.frontmatter.date} · {post.wordCount.toLocaleString()} 字
+                    </span>
+                  </div>
+                </div>
+
+                {post.frontmatter.cover && (
+                  <div class="latest-cover">
+                    <img
+                      src={post.frontmatter.cover}
+                      alt=""
+                      loading="lazy"
+                    />
+                    <div class="latest-cover-gradient"></div>
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <nav class="pagination" aria-label="文章分页">
+              {currentPage > 1 && (
+                <a href={currentPage - 1 === 1 ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}page/${currentPage - 1}/`} class="page-arrow">‹</a>
+              )}
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <a
+                  href={page === 1 ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}page/${page}/`}
+                  class:list={["page-number", { active: page === currentPage }]}
+                >
+                  {page}
+                </a>
+              ))}
+
+              {currentPage < totalPages && (
+                <a href={`${import.meta.env.BASE_URL}page/${currentPage + 1}/`} class="page-arrow">›</a>
+              )}
+            </nav>
+          )}
+        </section>
+
+        <footer class="site-footer">
+          <p>This blog is live for <span id="blog-live-time">0 days, 0 hours, 0 mins</span> and counting.</p>
+          <p>Copyright © 2026 IZUMI · 糖葫芦</p>
+        </footer>
+
+      </section>
+
+      <aside class="right-column">
+
+        <section class="right-section">
+          <div class="right-title">
+            <span>ARCHIVE</span>
+          </div>
+
+          <div class="year-list">
+            {years.map((year) => (
+              <a href={`${import.meta.env.BASE_URL}archive/`}>
+                {year}
+              </a>
+            ))}
+          </div>
+
+          <p id="search-empty" class="search-empty" hidden>
+            No posts found.
+          </p>
+        </section>
+
+        <section class="right-section writing-log-section">
+          <div class="right-title writing-log-title">
+            <span>WRITING LOG</span>
+            <span>{writingYear}.{String(writingMonth).padStart(2, "0")}</span>
+          </div>
+
+          <div class="writing-log-grid">
+            {
+              Array.from(
+                { length: writingDaysInMonth },
+                (_, index) => {
+                  const day = index + 1;
+
+                  const date =
+                    `${writingYear}-${String(writingMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+                  const words =
+                    writingDaily[date] || 0;
+
+                  let level = 0;
+
+                  if (words > 0) {
+                    const ratio =
+                      words / writingMaxWords;
+
+                    if (ratio <= 0.25) level = 1;
+                    else if (ratio <= 0.5) level = 2;
+                    else if (ratio <= 0.75) level = 3;
+                    else level = 4;
+                  }
+
+                  return (
+                    <span
+                      class={`writing-square level-${level}`}
+                      data-date={date.replaceAll("-", ".")}
+                      data-words={`${words} 字`}
+                    ></span>
+                  );
+                }
+              )
+            }
+          </div>
+
+          <div class="writing-log-summary">
+            本月 {writingDays} 天 · {writingTotalWords.toLocaleString()} 字
+          </div>
+
+          <div class="writing-log-legend">
+            <span>少</span>
+            <i class="writing-square level-0"></i>
+            <i class="writing-square level-1"></i>
+            <i class="writing-square level-2"></i>
+            <i class="writing-square level-3"></i>
+            <i class="writing-square level-4"></i>
+            <span>多</span>
+          </div>
+        </section>
+
+        <section class="right-section">
+          <div class="right-title">
+            <span>CATEGORY</span>
+          </div>
+
+          <div class="right-categories">
+            {categories.map((category, index) => (
+              <a href={category.url} class="right-category">
+                <span class="category-number">0{index + 1}</span>
+                <span class="category-name">{category.name}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+      </aside>
+
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  :global(body) {
+    margin: 0;
+    background: #F8FCFB;
+    color: #35495E;
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "Helvetica Neue",
+      "PingFang SC",
+      sans-serif;
+  }
+
+  .page {
+    position: relative;
+    isolation: isolate;
+    width: min(1400px, calc(100% - 60px));
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 45px 0;
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr) 180px;
+    gap: 55px;
+  }
+
+  /* 左侧 */
+
+  .sidebar {
+    position: sticky;
+    top: 45px;
+    height: auto;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .side-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: #35495E;
+    text-decoration: none;
+  }
+
+  .side-logo img {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .side-logo span {
+    font-family: monospace;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+  }
+
+  .home-clock {
+    margin-top: 34px;
+    padding: 13px 15px;
+    width: fit-content;
+    min-width: 150px;
+    border: 1px solid #CFE3EF;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 6px 20px rgba(124, 177, 210, 0.08);
+  }
+
+  .home-clock-label {
+    margin-bottom: 5px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  .home-clock-time {
+    color: #35495E;
+    font-family: monospace;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+  }
+
+  .home-clock-date {
+    margin-top: 4px;
+    color: #849A98;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 28px;
+  }
+
+  .side-nav a {
+    color: #849A98;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 13px;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .side-nav a:hover {
+    color: #7CB1D2;
+    transform: translateX(3px);
+  }
+
+  .sidebar-clock {
+    margin-top: 30px;
+    padding: 13px 15px;
+    width: fit-content;
+    min-width: 150px;
+    border: 1px solid #CFE3EF;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 6px 20px rgba(124, 177, 210, 0.08);
+  }
+
+  .clock-label {
+    margin-bottom: 5px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  .clock-time {
+    color: #35495E;
+    font-family: monospace;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+  }
+
+  .clock-date {
+    margin-top: 4px;
+    color: #849A98;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .side-intro {
+    margin-top: 32px;
+  }
+
+  .side-intro .hello {
+    margin: 0 0 18px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+  }
+
+  .side-intro h1 {
+    margin: 0;
+    color: #35495E;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+  }
+
+  .side-intro h1 span {
+    color: #7CB1D2;
+  }
+
+  .side-intro .description {
+    margin: 18px 0 0;
+    color: #667B7F;
+    font-size: 13px;
+    line-height: 1.7;
+    letter-spacing: 0.04em;
+  }
+
+  .sidebar-contact {
+    margin-top: 8px;
+  }
+
+  .sidebar-contact p {
+    margin: 0 0 16px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  .contact-links {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .contact-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+  }
+
+  .contact-links img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+  }
+
+  .contact-links a:hover img {
+    transform: translateY(-3px);
+  }
+
+  /* 中间 */
+
+  .main-column {
+    min-width: 0;
+    min-height: calc(100vh - 90px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .intro {
+    padding: 80px 0 100px;
+  }
+
+  .hello {
+    margin: 0 0 28px;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  h1 {
+    margin: 0;
+    color: #35495E;
+    font-size: clamp(42px, 6vw, 76px);
+    line-height: 0.95;
+    font-weight: 500;
+    letter-spacing: -0.06em;
+  }
+
+  h1 span {
+    color: #7CB1D2;
+  }
+
+  .description {
+    margin: 42px 0 0;
+    color: #667B7F;
+    font-size: 17px;
+    letter-spacing: 0.08em;
+  }
+
+  /* 最新文章 */
+
+  .latest {
+    margin-bottom: 100px;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #CFE3EF;
+  }
+
+  .search-box input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #35495E;
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  .search-box input::placeholder {
+    color: #A8B9B8;
+  }
+
+  .search-box span {
+    color: #7CB1D2;
+    font-size: 18px;
+  }
+
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border: none;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  .right-title {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border: none;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  .section-title span:last-child {
+    color: #7CB1D2;
+  }
+
+  .search-empty {
+    margin: 45px 0;
+    text-align: center;
+    color: #A8B9B8;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .latest-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .latest-post {
+    display: flex;
+    flex-direction: column;
+    min-height: 230px;
+    padding: 20px;
+    color: #35495E;
+    text-decoration: none;
+    border: 1px solid #CFE3EF;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 14px rgba(124, 177, 210, 0.05);
+    transition:
+      transform 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .latest-post:hover {
+    transform: translateY(-5px);
+    border-color: #7CB1D2;
+    box-shadow: 0 10px 24px rgba(124, 177, 210, 0.12);
+  }
+
+  .latest-card-top {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #E5F0F4;
+    font-family: monospace;
+    font-size: 11px;
+    color: #849A98;
+  }
+
+  .latest-card-top span:last-child {
+    color: #7CB1D2;
+    font-size: 17px;
+  }
+
+  .latest-main {
+    flex: 1;
+    padding: 25px 0;
+  }
+
+  .latest-main h2 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    line-height: 1.5;
+    font-weight: 500;
+    transition: color 0.25s ease;
+  }
+
+  .latest-post:hover .latest-main h2 {
+    color: #7CB1D2;
+  }
+
+  .latest-main p {
+    margin: 0;
+    color: #849A98;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .latest-card-bottom {
+    padding-top: 12px;
+    border-top: 1px solid #E5F0F4;
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 10px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+  }
+
+  .page-number,
+  .page-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    color: #849A98;
+    text-decoration: none;
+    border: 1px solid #CFE3EF;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    font-family: monospace;
+    font-size: 13px;
+    transition: all 0.2s ease;
+  }
+
+  .page-number:hover,
+  .page-arrow:hover,
+  .page-number.active {
+    color: #FFFFFF;
+    background: #7CB1D2;
+    border-color: #7CB1D2;
+  }
+
+  .page-arrow {
+    font-size: 18px;
+  }
+
+  .view-all {
+    display: block;
+    width: fit-content;
+    margin: 22px 0 0 auto;
+    color: #7CB1D2;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  /* 右侧 */
+
+  .right-column {
+    position: sticky;
+    top: 45px;
+    align-self: start;
+    padding-top: 0;
+  }
+
+  .right-section {
+    margin-bottom: 55px;
+  }
+
+  .right-title {
+    color: #849A98;
+  }
+
+  .year-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 6px;
+  }
+
+  .year-list a {
+    display: inline-block;
+    padding: 5px 9px;
+    color: #849A98;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 13px;
+    border: 1px solid #CFE3EF;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.45);
+    transition: all 0.2s ease;
+  }
+
+  .year-list a:hover {
+    color: #7CB1D2;
+    border-color: #7CB1D2;
+    background: rgba(241, 250, 248, 0.82);
+  }
+
+  .writing-log-section {
+    margin-top: 30px;
+    margin-bottom: 34px;
+  }
+
+  .writing-log-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(207, 227, 239, 0.7);
+  }
+
+  .writing-log-title span:first-child {
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .writing-log-title span:last-child {
+    color: #9AAEAE;
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 0.03em;
+  }
+
+  .writing-log-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 16px);
+    grid-auto-rows: 16px;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .writing-square {
+    display: block;
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    border: 1px solid rgba(164, 196, 215, 0.95);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.5);
+    transition:
+      transform 0.16s ease,
+      border-color 0.16s ease,
+      box-shadow 0.16s ease;
+  }
+
+  .writing-square.level-1 {
+    background: rgba(124, 177, 210, 0.18);
+  }
+
+  .writing-square.level-2 {
+    background: rgba(124, 177, 210, 0.34);
+  }
+
+  .writing-square.level-3 {
+    background: rgba(124, 177, 210, 0.52);
+  }
+
+  .writing-square.level-4 {
+    background: rgba(124, 177, 210, 0.72);
+  }
+
+  .writing-square:hover {
+    transform: scale(1.2);
+    border-color: #7CB1D2;
+    box-shadow: 0 2px 8px rgba(124, 177, 210, 0.18);
+  }
+
+  .writing-square[data-date] {
+    position: relative;
+    cursor: default;
+  }
+
+  .writing-square[data-date]::after {
+    content: attr(data-date) " · " attr(data-words);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%) translateY(3px);
+    padding: 5px 8px;
+    white-space: nowrap;
+    color: #35495E;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #CFE3EF;
+    border-radius: 7px;
+    box-shadow: 0 5px 16px rgba(124, 177, 210, 0.14);
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 20;
+  }
+
+  .writing-square[data-date]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .writing-log-summary {
+    margin-top: 11px;
+    color: #849A98;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+
+  .writing-log-legend {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 9px;
+    color: #849A98;
+    font-family: monospace;
+    font-size: 10px;
+  }
+
+  .writing-log-legend .writing-square {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+  }
+
+  .right-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 15px;
+  }
+
+  .right-category {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 16px;
+    color: #35495E;
+    text-decoration: none;
+    background: #FFFFFF;
+    border: 1px solid #CDE3EF;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(124, 177, 210, 0.08);
+    font-size: 15px;
+    transition: all 0.2s ease;
+  }
+
+  .right-category:hover {
+    color: #7CB1D2;
+    background: rgba(241, 250, 248, 0.82);
+    border-color: #79C9C3;
+    transform: translateY(-2px);
+  }
+
+  .category-number {
+    color: #7CB1D2;
+    font-family: monospace;
+    font-size: 10px;
+  }
+
+  .category-name {
+    font-size: 15px;
+  }
+
+  .right-category::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    bottom: 7px;
+    width: 4px;
+    border-radius: 4px;
+    background: #7CB1D2;
+  }
+
+  .right-category:nth-child(2)::after {
+    background: #86C5FF;
+  }
+
+  .right-category:nth-child(3)::after {
+    background: #FFA62B;
+  }
+
+  .right-category:nth-child(4)::after {
+    background: #F8E6A0;
+  }
+
+  /* 底部 */
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 120px;
+    padding-top: 20px;
+    border-top: 1px solid #35495E;
+    font-family: monospace;
+    font-size: 11px;
+    color: #849A98;
+  }
+
+  /* 手机 */
+
+  @media (max-width: 950px) {
+    .page {
+      grid-template-columns: 160px minmax(0, 1fr);
+      gap: 35px;
+    }
+
+    .right-column {
+      display: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .page {
+      display: block;
+      width: auto;
+      padding: 30px 20px;
+    }
+
+    .sidebar {
+      position: static;
+      height: auto;
+    }
+
+    .side-logo {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .side-logo img {
+      width: 48px;
+      height: 48px;
+    }
+
+    .side-nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin-top: 28px;
+    }
+
+    .sidebar-contact {
+      margin-top: 28px;
+    }
+
+    .main-column {
+      margin-top: 55px;
+    }
+
+    .side-intro {
+      margin-top: 28px;
+    }
+
+    .side-intro h1 {
+      font-size: 14px;
+    }
+
+    .latest-grid {
+      grid-template-columns: 1fr;
+    }
+
+    footer {
+      display: block;
+      line-height: 2;
+    }
+  }
+</style>
+
+<script>
+  const blogStart = new Date("2026-10-03T00:00:00+08:00");
+  const liveTime = document.querySelector("#blog-live-time");
+
+  function updateBlogLiveTime() {
+    if (!liveTime) return;
+
+    const diff = Date.now() - blogStart.getTime();
+    const totalMinutes = Math.floor(diff / 60000);
+
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    liveTime.textContent = `${days} days, ${hours} hours, ${minutes} mins`;
+  }
+
+  updateBlogLiveTime();
+  setInterval(updateBlogLiveTime, 60000);
+
+  const searchInput = document.querySelector("#post-search");
+  const postCards = document.querySelectorAll(".latest-post");
+  const searchEmpty = document.querySelector("#search-empty");
+
+  searchInput?.addEventListener("input", () => {
+    const keyword = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    postCards.forEach((card) => {
+      const text = card.textContent?.toLowerCase() || "";
+      const visible = !keyword || text.includes(keyword);
+
+      card.style.display = visible ? "" : "none";
+
+      if (visible) visibleCount++;
+    });
+
+    if (searchEmpty) {
+      searchEmpty.hidden = !keyword || visibleCount > 0;
+    }
+  });
+</script>
+
+<script>
+  const homeClockTime = document.querySelector("#home-live-time");
+  const homeClockDate = document.querySelector("#home-live-date");
+
+  function updateHomeClock() {
+    if (!homeClockTime || !homeClockDate) return;
+
+    const now = new Date();
+
+    homeClockTime.textContent = new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(now);
+
+    homeClockDate.textContent = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now).replaceAll("-", ".");
+  }
+
+  updateHomeClock();
+  setInterval(updateHomeClock, 1000);
+</script>
+
+<style>
+.latest-post {
+  overflow: hidden;
+}
+
+.latest-cover {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  background: #F7FBFD;
+}
+
+.latest-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.latest-cover-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 252, 251, 0.95) 0%,
+    rgba(248, 252, 251, 0.65) 18%,
+    rgba(124, 177, 210, 0.08) 42%,
+    rgba(248, 252, 251, 0) 65%
+  );
+  pointer-events: none;
+}
+
+.latest-post:hover .latest-cover img {
+  transform: scale(1.04);
+}
+
+.latest-card-content {
+  position: relative;
+  margin-top: 10px;
+}
+</style>
+
+<style>
+.latest-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+
+.latest-post-meta {
+  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+</style>
+
+
+<style>
+/* 日系杂志风：真正的瀑布流 */
+@media (min-width: 701px) {
+  .latest-grid {
+    display: block;
+    column-count: 2;
+    column-gap: 16px;
+    margin-top: 16px;
+  }
+
+  .latest-post {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    margin: 0 0 16px;
+    vertical-align: top;
+  }
+
+  .latest-post:nth-child(4n + 1) .latest-cover {
+    height: 175px;
+  }
+
+  .latest-post:nth-child(4n + 2) .latest-cover {
+    height: 125px;
+  }
+
+  .latest-post:nth-child(4n + 3) .latest-cover {
+    height: 150px;
+  }
+
+  .latest-post:nth-child(4n) .latest-cover {
+    height: 190px;
+  }
+}
+
+@media (max-width: 700px) {
+  .latest-grid {
+    display: block;
+    column-count: 1;
+    column-gap: 0;
+  }
+
+  .latest-post {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 16px;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+  }
+}
+</style>
