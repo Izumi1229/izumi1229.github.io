@@ -263,16 +263,41 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const links = Array.from(sideList.querySelectorAll("a"));
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      links.forEach((link) => {
-        link.classList.toggle("active", link.hash === "#" + entry.target.id);
-      });
-    });
-  }, { rootMargin: "-15% 0px -75% 0px" });
 
-  headings.forEach((heading) => observer.observe(heading));
+  let ticking = false;
+
+  function updateActiveHeading() {
+    const threshold = window.innerHeight * 0.28;
+    let currentHeading = headings[0];
+
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top <= threshold) {
+        currentHeading = heading;
+      } else {
+        break;
+      }
+    }
+
+    links.forEach((link) => {
+      link.classList.toggle(
+        "active",
+        link.hash === "#" + currentHeading.id
+      );
+    });
+
+    ticking = false;
+  }
+
+  function requestUpdate() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateActiveHeading);
+    }
+  }
+
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+  updateActiveHeading();
 });
 </script>
 </body>

@@ -1083,3 +1083,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 }
 </style>
+
+<style is:global>
+@media (min-width: 1101px) {
+  body .floating-toc .toc-link {
+    border-left: 2px solid transparent !important;
+    border-radius: 4px;
+    padding: 7px 9px !important;
+    transition: color .2s ease, background .2s ease, border-color .2s ease;
+  }
+
+  body .floating-toc .toc-link.active {
+    color: #527F9B !important;
+    background: rgba(207, 227, 239, .38) !important;
+    border-left-color: #7CB1D2 !important;
+    font-weight: 600;
+  }
+
+  body .floating-toc .toc-link:hover {
+    color: #527F9B !important;
+    background: rgba(207, 227, 239, .22) !important;
+  }
+
+  body .floating-toc .toc-h3.active {
+    background: rgba(207, 227, 239, .3) !important;
+  }
+}
+</style>
