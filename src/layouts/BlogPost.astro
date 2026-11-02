@@ -866,3 +866,107 @@ const category =
   }
 }
 \n</style>
+
+<style is:global>
+/* ===== TOC visual refinement ===== */
+
+.article-toc {
+  max-width: 700px;
+  margin: 0 0 42px !important;
+  padding: 0 0 22px !important;
+  border: none !important;
+  border-bottom: 1px solid #E5EDF1 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.article-toc .toc-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #849A98 !important;
+  font-family: monospace;
+  font-size: 11px !important;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
+
+.article-toc .toc-toggle {
+  color: #7CB1D2;
+  font-size: 17px;
+}
+
+.article-toc .toc-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 17px !important;
+}
+
+.article-toc .toc-link,
+.floating-toc .toc-link {
+  display: block;
+  width: fit-content;
+  color: #647B8D !important;
+  font-size: 13px;
+  line-height: 1.7;
+  text-decoration: none !important;
+  transition: color .2s ease, padding .2s ease;
+}
+
+.article-toc .toc-link:hover,
+.article-toc .toc-link.active,
+.floating-toc .toc-link:hover,
+.floating-toc .toc-link.active {
+  color: #7CB1D2 !important;
+  text-decoration: none !important;
+}
+
+.article-toc .toc-link.active {
+  font-weight: 600;
+}
+
+.article-toc .toc-h3 {
+  margin-left: 18px;
+  color: #849A98 !important;
+  font-size: 12px;
+}
+
+.floating-toc {
+  padding: 12px 15px !important;
+  border-left: 1px solid #CFE3EF !important;
+  background: transparent !important;
+}
+
+.floating-toc-title {
+  margin-bottom: 17px;
+  color: #849A98;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+.floating-toc-list {
+  display: grid;
+  gap: 10px;
+}
+
+.floating-toc .toc-link {
+  font-size: 12px;
+}
+
+.floating-toc .toc-h3 {
+  margin-left: 12px;
+  color: #849A98 !important;
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .article-toc {
+    margin-bottom: 32px !important;
+  }
+}
+</style>
