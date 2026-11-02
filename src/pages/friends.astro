@@ -78,7 +78,7 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
           <h2>{friend.name}</h2>
           <p>{friend.description}</p >
         </div>
-
+        <span class="friend-arrow">↗</span>
       </a >
     ))}
   </div>
@@ -184,67 +184,82 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     font-weight: 500;
     letter-spaci  .friends-list {
     display: grid;
-    grid  .friends-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 55px;
-    row-gap: 48px;
-    padding: 8px 0 35px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .friend {
     display: flex;
-    align-items: flex-start;
-    gap: 13px;
+    align-items: center;
     min-width: 0;
-    color: inherit;
+    min-height: 48px;
+    padding: 6px 8px;
+    border: 1px solid #DCEBF0;
+    border-radius: 8px;
+    color: #35495E;
     text-decoration: none;
-    transition: opacity 0.2s ease;
-  }
-
-  .friend:link,
-  .friend:visited {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .friend:hover {
-    opacity: 0.72;
+    background: rgba(247, 252, 251, 0.72);
+    transition: transform 0.2s ease, border-color 0.2s ease;
   }
 
   .friend-avatar {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
     object-fit: cover;
-    border-radius: 50%;
+    border-radius: 7px;
+    border: 1px solid #CFE3EF;
   }
 
   .friend-info {
+    flex: 1;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin: 0;
+    margin-left: 7px;
   }
 
   .friend-info h2 {
-    margin: 0;
-    color: #45BFA5;
-    font-size: 15px;
-    line-height: 1.4;
-    font-weight: 600;
+    margin: 0 0 2px;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .friend-info p {
     margin: 0;
-    color: #58636B;
-    font-size: 13px;
-    line-height: 1.6;
-    overflow-wrap: anywhere;
+    overflow: hidden;
+    color: #849A98;
+    font-size: 10px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-er-top: 1px solid #D6E8EF;
+  .friend-arrow {
+    flex-shrink: 0;
+    margin-left: 5px;
+    color: #A8C8D9 !important;
+    font-size: 12px;
+  }
+
+  .friend:hover {
+    transform: translateY(-2px);
+    border-color: #A9D2DF;
+  }
+
+  .friend:hover h2,
+  .friend:hover .friend-arrow {
+    color: #7CB1D2 !important;
+  }
+
+olor: #7CB1D2;
+}
+
+  .empty {
+    padding: 55px 10px;
+    border-top: 1px solid #D6E8EF;
     border-bottom: 1px solid #D6E8EF;
   }
 
@@ -269,7 +284,7 @@ er-top: 1px solid #D6E8EF;
 
     .friends-list {
       grid-template-columns: 1fr;
-      row-gap: 30px;
+      gap: 7px;
     }
   }
 
