@@ -1047,3 +1047,96 @@ function getExcerpt(post) {
     }
   }
 </style>
+
+<style>
+  /* works 页面：三列封面卡片 */
+  .works-main .posts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-count: unset;
+    column-gap: 28px;
+    row-gap: 36px;
+    align-items: stretch;
+  }
+
+  .works-main .posts .post {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    break-inside: auto;
+    overflow: hidden;
+    border: 1px solid #E8EEF0;
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 4px 18px rgba(60, 85, 100, 0.035);
+    text-decoration: none;
+  }
+
+  .works-main .posts .post-cover {
+    flex: none;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+
+  .works-main .posts .post-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .works-main .posts .post-info {
+    flex: 1;
+    padding: 19px 22px 21px;
+    gap: 12px;
+  }
+
+  .works-main .posts .post-date {
+    font-size: 12px;
+  }
+
+  .works-main .posts .post-main h2 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .works-main .posts .post-main p {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .works-main .posts .post-card-bottom {
+    margin-top: auto;
+    padding-top: 12px;
+  }
+
+  .works-main .posts .post-arrow {
+    display: none;
+  }
+
+  .works-main .posts .post:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 26px rgba(60, 85, 100, 0.09);
+    border-color: #D5E5EC;
+  }
+
+  @media (max-width: 1050px) {
+    .works-main .posts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .works-main .posts {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>
