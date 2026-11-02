@@ -67,13 +67,19 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
 ) : (
   <div class="friends-list">
     {friends.map((friend) => (
-      <a href={friend.url} class="friend" target="_blank" rel="noopener noreferrer">
-        <div>
+      <a href= "friend" target="_blank" rel="noopener noreferrer">
+        <img
+          class="friend-avatar"
+          src={friend.avatar || "/images/favicon.png"}
+          alt={friend.name}
+          loading="lazy"
+        />
+        <div class="friend-info">
           <h2>{friend.name}</h2>
-          <p>{friend.description}</p>
+          <p>{friend.description}</p >
         </div>
-        <span>↗</span>
-      </a>
+        <span class="friend-arrow">↗</span>
+      </a >
     ))}
   </div>
 )}
@@ -200,6 +206,47 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     transform 0.2s ease,
     border-color 0.2s ease,
     background 0.2s ease;
+}
+
+
+.friend-avatar {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #CFE3EF;
+}
+
+.friend-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 16px;
+}
+
+.friend-info h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.friend-info p {
+  margin: 0;
+  color: #71808C;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.friend-arrow {
+  flex-shrink: 0;
+  margin-left: 12px;
+  color: #A8C8D9 !important;
+  font-size: 18px;
+}
+
+.friend:hover .friend-arrow {
+  color: #7CB1D2 !important;
 }
 
 .friend:hover {
