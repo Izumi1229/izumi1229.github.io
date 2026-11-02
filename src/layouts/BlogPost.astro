@@ -257,6 +257,10 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       heading.scrollIntoView({ behavior: "smooth", block: "start" });
       history.replaceState(null, "", "#" + heading.id);
+
+      links.forEach((item) => {
+        item.classList.toggle("active", item === link);
+      });
     });
 
     sideList.appendChild(link);
@@ -296,6 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   window.addEventListener("scroll", requestUpdate, { passive: true });
+  document.addEventListener("scroll", requestUpdate, { passive: true, capture: true });
   window.addEventListener("resize", requestUpdate);
   updateActiveHeading();
 });
