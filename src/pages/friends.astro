@@ -363,31 +363,31 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     }
   }
 \n
-  .info-row a.exchange-link {
+  .exchange-card .exchange-details .info-row a.exchange-link {
     display: inline;
-    color: #71808C;
+    color: #71808C !important;
     font-family: inherit;
     font-size: 12px;
     line-height: 1.8;
-    text-decoration: none;
+    text-decoration: none !important;
     overflow-wrap: anywhere;
     user-select: all;
     cursor: pointer;
     transition: color 0.25s ease;
   }
 
-  .info-row a.exchange-link::after {
+  .exchange-card .exchange-details .info-row a.exchange-link::after {
     content: " ↗";
     color: #A8C8D9;
     font-size: 11px;
     user-select: none;
   }
 
-  .info-row a.exchange-link:hover {
-    color: #7CB1D2;
+  .exchange-card .exchange-details .info-row a.exchange-link:hover {
+    color: #7CB1D2 !important;
   }
 
-  .info-row a.exchange-link:hover::after {
+  .exchange-card .exchange-details .info-row a.exchange-link:hover::after {
     color: #7CB1D2;
   }
 
