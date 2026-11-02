@@ -1067,3 +1067,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 }
 </style>
+
+<style is:global>
+@media (min-width: 1101px) {
+  body .floating-toc .floating-toc-title {
+    font-size: 11px !important;
+  }
+
+  body .floating-toc .toc-link {
+    font-size: 14px !important;
+  }
+
+  body .floating-toc .toc-h3 {
+    font-size: 13px !important;
+  }
+}
+</style>
