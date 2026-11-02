@@ -1057,3 +1057,45 @@ function getExcerpt(post) {
   }
 }
 </style>
+
+<style>
+@media (min-width: 1051px) {
+  .daily-content-layout .posts {
+    display: block !important;
+    column-count: 3 !important;
+    column-gap: 22px !important;
+  }
+
+  .daily-content-layout .posts .post {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    margin: 0 0 22px !important;
+    vertical-align: top;
+  }
+
+  .daily-content-layout .posts .post:nth-child(4n + 1) .post-cover { height: 175px !important; }
+  .daily-content-layout .posts .post:nth-child(4n + 2) .post-cover { height: 125px !important; }
+  .daily-content-layout .posts .post:nth-child(4n + 3) .post-cover { height: 150px !important; }
+  .daily-content-layout .posts .post:nth-child(4n) .post-cover { height: 195px !important; }
+}
+
+@media (min-width: 601px) and (max-width: 1050px) {
+  .daily-content-layout .posts {
+    display: block !important;
+    column-count: 2 !important;
+    column-gap: 18px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .daily-content-layout .posts {
+    display: block !important;
+    column-count: 1 !important;
+  }
+}
+</style>

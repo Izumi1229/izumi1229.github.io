@@ -1403,3 +1403,46 @@ const categories = [
   }
 }
 </style>
+
+<style>
+@media (min-width: 701px) {
+  .latest-grid {
+    display: block !important;
+    column-count: 3 !important;
+    column-gap: 22px !important;
+    margin-top: 16px;
+  }
+
+  .latest-post {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    width: 100%;
+    height: auto;
+    min-height: 0 !important;
+    box-sizing: border-box;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    margin: 0 0 22px !important;
+  }
+
+  .latest-post:nth-child(4n + 1) .latest-cover { height: 175px !important; }
+  .latest-post:nth-child(4n + 2) .latest-cover { height: 125px !important; }
+  .latest-post:nth-child(4n + 3) .latest-cover { height: 150px !important; }
+  .latest-post:nth-child(4n) .latest-cover { height: 195px !important; }
+}
+
+@media (min-width: 601px) and (max-width: 700px) {
+  .latest-grid {
+    display: block !important;
+    column-count: 2 !important;
+    column-gap: 16px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .latest-grid {
+    display: block !important;
+    column-count: 1 !important;
+  }
+}
+</style>
