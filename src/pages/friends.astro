@@ -83,6 +83,32 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
     ))}
   </div>
 )}
+      <section class="comments" aria-label="交换友链留言板">
+        <div class="comments-heading">
+          <p class="comments-label">LET'S BE FRIENDS</p>
+          <h2>交换友链留言板 ♡</h2>
+          <p>欢迎留下你的网站名称、简介、网址和头像地址，期待认识新的朋友！</p>
+        </div>
+
+        <script
+          src="https://giscus.app/client.js"
+          data-repo="izumi1229/izumi1229.github.io"
+          data-repo-id="R_kgDOU5pq2A"
+          data-category="Announcements"
+          data-category-id="DIC_kwDOU5pq2M4DHGGA"
+          data-mapping="pathname"
+          data-strict="0"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="light"
+          data-lang="zh-CN"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async
+        ></script>
+      </section>
+
       <footer class="site-footer">
         <p>This blog is live for <span id="blog-duration">0 days, 0 hours, 0 mins</span> and counting.</p>
         <p>Copyright © 2026 IZUMI · 糖葫芦</p>
@@ -435,3 +461,36 @@ import FloatingTanghulu from "../components/FloatingTanghulu.astro";
   updateBlogLiveTime();
   setInterval(updateBlogLiveTime, 60000);
 </script>
+
+
+<style>
+  .comments {
+    margin-top: 54px;
+    padding-top: 28px;
+    border-top: 1px solid #DCEAF0;
+  }
+
+  .comments-heading {
+    margin-bottom: 24px;
+  }
+
+  .comments-label {
+    margin: 0 0 8px;
+    color: #7CB1D2;
+    font-size: 10px;
+    letter-spacing: .16em;
+  }
+
+  .comments-heading h2 {
+    margin: 0 0 10px;
+    color: #35495E;
+    font-size: 22px;
+    font-weight: 500;
+  }
+
+  .comments-heading > p:last-child {
+    color: #7B8D98;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+</style>
