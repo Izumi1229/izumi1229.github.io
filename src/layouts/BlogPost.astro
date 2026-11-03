@@ -59,9 +59,13 @@ const rawKey = Object.keys(rawPosts).find((key) => {
 
 const rawContent = rawKey ? rawPosts[rawKey] : "";
 
-const body = rawContent
+const reviewSource = rawContent
   .replace(/^---[\s\S]*?---/, "")
-  .replace(/\s/g, "");
+  .trim();
+
+const hasReview = reviewSource.length > 0;
+
+const body = reviewSource.replace(/\s/g, "");
 
 const wordCount = Array.from(body).length;
 
@@ -152,16 +156,24 @@ const category =
                 <span>MY REVIEW</span>
                 <span>✳</span>
               </div>
-              <p class="review-empty">还没有写下关于这部作品的感受。</p>
+              {hasReview ? (
+                <div class="review-body">
+                  <slot />
+                </div>
+              ) : (
+                <p class="review-empty">还没有写下关于这部作品的感受。</p>
+              )}
             </section>
           </>
         )}
 
         <div class="line"></div>
 
-        <div class="content">
-          <slot />
-        </div>
+        {path.startsWith("/works/") ? null : (
+          <div class="content">
+            <slot />
+          </div>
+        )}
 
         <section class="comments" aria-label="评论区">
           <script
@@ -595,6 +607,41 @@ document.addEventListener("DOMContentLoaded", () => {
     letter-spacing: 0.14em;
   }
   .review-empty { margin: 22px 0 0; color: #A0B2B2; font-size: 13px; }
+  .review-body {
+    margin-top: 22px;
+    max-width: 700px;
+    color: #526779;
+    font-size: 15px;
+    line-height: 2;
+    overflow-wrap: anywhere;
+  }
+  .review-body :global(h1),
+  .review-body :global(h2),
+  .review-body :global(h3) {
+    color: #35495E;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .review-body :global(h2) {
+    margin: 28px 0 12px;
+    padding-left: 12px;
+    border-left: 2px solid #7CB1D2;
+    font-size: 20px;
+  }
+  .review-body :global(h3) {
+    margin: 22px 0 10px;
+    font-size: 17px;
+  }
+  .review-body :global(p) { margin: 12px 0; }
+  .review-body :global(blockquote) {
+    margin: 18px 0;
+    padding: 5px 16px;
+    border-left: 3px solid #CFE3EF;
+    color: #8196A5;
+  }
+  .review-body :global(ul),
+  .review-body :global(ol) { padding-left: 24px; }
+  .review-body :global(strong) { color: #35495E; }
 
   @media (max-width: 700px) {
     .work-archive {

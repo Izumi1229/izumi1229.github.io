@@ -28,6 +28,13 @@ button{border:0;border-radius:9px;padding:12px 24px;background:#7CB1D2;color:whi
 button:disabled{opacity:.5;cursor:wait}
 .actions{display:flex;align-items:center;gap:18px;margin-top:24px}
 #status{font-size:13px;color:#718797;white-space:pre-wrap}
+.review-toolbar{font-size:12px;color:#91A7A7;margin-top:8px}
+.review-preview-title{font-size:12px;color:#7CB1D2;letter-spacing:.08em;margin:18px 0 8px}
+.review-preview{min-height:70px;padding:16px 18px;border:1px solid #e5eef1;border-radius:9px;background:#F8FCFB;color:#526779;font-size:14px;line-height:1.9;overflow-wrap:anywhere}
+.review-preview h1,.review-preview h2,.review-preview h3{color:#35495E;margin:14px 0 8px}
+.review-preview blockquote{margin:10px 0;padding:4px 14px;border-left:3px solid #CFE3EF;color:#8196A5}
+.review-preview ul{padding-left:22px}
+.review-preview p{margin:8px 0}
 .back{font-size:13px}
 @media(max-width:600px){.grid{grid-template-columns:1fr}form{padding:20px}.full{grid-column:auto}}
 </style>
@@ -86,6 +93,23 @@ button:disabled{opacity:.5;cursor:wait}
 <input id="coverFile" type="file" accept=".jpg,.jpeg,.png,.gif,.webp">
 <img id="coverPreview" class="cover-preview" alt="封面预览">
 </div>
+</div>
+
+<div class="section">我的评价</div>
+<div class="field full">
+<label for="review">作品感想（支持 Markdown）</label>
+<textarea id="review" name="review" rows="10" placeholder="# 我的感受
+
+写下你对这部作品的评价……
+
+**喜欢的地方**
+
+> 想记录的一句话"></textarea>
+<div class="review-toolbar">
+<span>支持标题、加粗、引用、列表和段落</span>
+</div>
+<div class="review-preview-title">实时预览</div>
+<div id="reviewPreview" class="review-preview">这里会显示评价预览。</div>
 </div>
 
 <div class="section">作品档案</div>
@@ -180,6 +204,82 @@ coverFile.addEventListener("change",()=>{
   coverPreview.style.display="block";
 });
 
+const reviewInput=document.querySelector("#review");
+const reviewPreview=document.querySelector("#reviewPreview");
+
+function escapeHTML(value){
+  return value.replace(/[&<>"']/g,char=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[char]);
+}
+
+function renderReviewPreview(source){
+  if(!source.trim()){
+    reviewPreview.textContent="这里会显示评价预览。";
+    return;
+  }
+
+  let html="";
+  let paragraph=[];
+  let inList=false;
+  let inQuote=false;
+
+  const inline=text=>escapeHTML(text)
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g,"<em>$1</em>")
+    .replace(/`(.+?)`/g,"<code>$1</code>");
+
+  const flush=()=>{
+    if(paragraph.length){
+      html+="<p>"+inline(paragraph.join("<br>"))+"</p>";
+      paragraph=[];
+    }
+  };
+
+  for(const raw of source.split("\n")){
+    const line=raw.trim();
+
+    if(!line){
+      flush();
+      if(inList){html+="</ul>";inList=false;}
+      if(inQuote){html+="</blockquote>";inQuote=false;}
+      continue;
+    }
+
+    const heading=line.match(/^(#{1,3})\s+(.+)$/);
+    if(heading){
+      flush();
+      if(inList){html+="</ul>";inList=false;}
+      if(inQuote){html+="</blockquote>";inQuote=false;}
+      html+=`<h${heading[1].length}>${inline(heading[2])}</h${heading[1].length}>`;
+    }else if(line.startsWith(">")){
+      flush();
+      if(inList){html+="</ul>";inList=false;}
+      if(!inQuote){html+="<blockquote>";inQuote=true;}
+      html+="<p>"+inline(line.replace(/^>\s?/,""))+"</p>";
+    }else if(/^[-*+]\s+/.test(line)){
+      flush();
+      if(inQuote){html+="</blockquote>";inQuote=false;}
+      if(!inList){html+="<ul>";inList=true;}
+      html+="<li>"+inline(line.replace(/^[-*+]\s+/,""))+"</li>";
+    }else{
+      if(inList){html+="</ul>";inList=false;}
+      if(inQuote){html+="</blockquote>";inQuote=false;}
+      paragraph.push(line);
+    }
+  }
+
+  flush();
+  if(inList)html+="</ul>";
+  if(inQuote)html+="</blockquote>";
+  reviewPreview.innerHTML=html;
+}
+
+reviewInput.addEventListener("input",()=>{
+  renderReviewPreview(reviewInput.value);
+});
+renderReviewPreview("");
+
 async function uploadCover(){
   const file=coverFile.files[0];
   if(!file)return "";
@@ -209,6 +309,7 @@ form.addEventListener("submit",async event=>{
   try{
     const data=Object.fromEntries(new FormData(form).entries());
     data.type=typeSelect.value;
+    data.review=reviewInput.value;
     data.cover=await uploadCover();
 
     const response=await fetch("/api/works/create",{

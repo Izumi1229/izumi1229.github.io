@@ -1016,9 +1016,12 @@ ${String(data.content || "")}
 
           lines.push("---", "");
 
+          const review = String(data.review || "").trim();
+          const content = lines.join("\n") + review + (review ? "\n" : "");
+
           await fs.writeFile(
             filePath,
-            lines.join("\n"),
+            content,
             {encoding:"utf8", flag:"wx"}
           );
 
