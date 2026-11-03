@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>添加作品 · IZUMI ADMIN</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F8FCFB;color:#35495E;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;padding:40px 20px}
+main{max-width:850px;margin:auto}
+a{color:#7CB1D2;text-decoration:none}
+h1{font-size:28px;font-weight:500;margin:18px 0 8px}
+.subtitle{color:#8999a5;font-size:13px}
+form{background:white;border:1px solid #e5eef1;border-radius:16px;padding:30px}
+.section{font-size:15px;font-weight:600;margin:28px 0 18px;padding-left:11px;border-left:3px solid #7CB1D2}
+.section:first-child{margin-top:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.field{margin-bottom:18px}
+label{display:block;font-size:13px;margin-bottom:8px;color:#526779}
+input,textarea,select{width:100%;padding:11px 13px;border:1px solid #dce7eb;border-radius:8px;background:white;color:#35495E;font:inherit;font-size:14px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:#7CB1D2}
+textarea{min-height:90px;resize:vertical}
+.full{grid-column:1/-1}
+.type-fields{display:none}
+.type-fields.active{display:block}
+.cover-preview{max-width:180px;max-height:220px;object-fit:cover;border-radius:8px;margin-top:12px;display:none}
+button{border:0;border-radius:9px;padding:12px 24px;background:#7CB1D2;color:white;font-size:14px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+.actions{display:flex;align-items:center;gap:18px;margin-top:24px}
+#status{font-size:13px;color:#718797;white-space:pre-wrap}
+.back{font-size:13px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}form{padding:20px}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<a class="back" href="/admin">← 返回后台</a>
+<h1>添加一件收藏</h1>
+<div class="subtitle">把喜欢的作品，慢慢收进自己的收藏馆。</div>
+</header>
+
+<form id="workForm">
+<div class="section">基本信息</div>
+<div class="grid">
+<div class="field">
+<label>作品类型 *</label>
+<select id="type" required>
+<option value="movie">电影</option>
+<option value="tv">电视剧</option>
+<option value="book">书籍</option>
+<option value="music">音乐</option>
+<option value="game">游戏</option>
+</select>
+</div>
+<div class="field">
+<label>作品名称 *</label>
+<input name="title" required placeholder="请输入作品名称">
+</div>
+<div class="field full">
+<label>一句话简介</label>
+<textarea name="description" placeholder="写下你对这部作品的第一印象……"></textarea>
+</div>
+<div class="field">
+<label>收藏日期 *</label>
+<input name="date" type="date" required>
+</div>
+<div class="field">
+<label>我的评分（0—5，可半星）</label>
+<select name="rating">
+<option value="0">暂不评分</option>
+<option value="0.5">0.5</option>
+<option value="1">1</option>
+<option value="1.5">1.5</option>
+<option value="2">2</option>
+<option value="2.5">2.5</option>
+<option value="3">3</option>
+<option value="3.5">3.5</option>
+<option value="4">4</option>
+<option value="4.5">4.5</option>
+<option value="5">5</option>
+</select>
+</div>
+<div class="field full">
+<label>封面图片</label>
+<input id="coverFile" type="file" accept=".jpg,.jpeg,.png,.gif,.webp">
+<img id="coverPreview" class="cover-preview" alt="封面预览">
+</div>
+</div>
+
+<div class="section">作品档案</div>
+<div class="grid">
+<div class="field full">
+<label>原名 / 原标题</label>
+<input name="originalTitle" placeholder="Original title">
+</div>
+</div>
+
+<div class="type-fields active" data-type="movie">
+<div class="grid">
+<div class="field"><label>导演</label><input name="director"></div>
+<div class="field"><label>主演</label><input name="cast"></div>
+<div class="field"><label>地区</label><input name="region"></div>
+<div class="field"><label>上映日期</label><input name="publishDate"></div>
+</div>
+</div>
+
+<div class="type-fields" data-type="tv">
+<div class="grid">
+<div class="field"><label>导演</label><input name="director"></div>
+<div class="field"><label>主演</label><input name="cast"></div>
+<div class="field"><label>地区</label><input name="region"></div>
+<div class="field"><label>集数</label><input name="episodes"></div>
+<div class="field"><label>首播日期</label><input name="publishDate"></div>
+</div>
+</div>
+
+<div class="type-fields" data-type="book">
+<div class="grid">
+<div class="field"><label>作者</label><input name="author"></div>
+<div class="field"><label>译者</label><input name="translator"></div>
+<div class="field"><label>出版社</label><input name="publisher"></div>
+<div class="field"><label>发行方</label><input name="distributor"></div>
+<div class="field"><label>出版日期</label><input name="publishDate"></div>
+<div class="field"><label>页数</label><input name="pages"></div>
+</div>
+</div>
+
+<div class="type-fields" data-type="music">
+<div class="grid">
+<div class="field"><label>艺术家 / 歌手</label><input name="artist"></div>
+<div class="field"><label>专辑</label><input name="album"></div>
+<div class="field"><label>发行日期</label><input name="publishDate"></div>
+<div class="field"><label>曲目</label><input name="tracks"></div>
+</div>
+</div>
+
+<div class="type-fields" data-type="game">
+<div class="grid">
+<div class="field"><label>开发商</label><input name="developer"></div>
+<div class="field"><label>发行商</label><input name="publisher"></div>
+<div class="field"><label>平台</label><input name="platform"></div>
+<div class="field"><label>发行日期</label><input name="publishDate"></div>
+</div>
+</div>
+
+<div class="actions">
+<button id="saveButton" type="submit">保存到收藏馆</button>
+<span id="status"></span>
+</div>
+</form>
+</main>
+
+<script>
+const form=document.querySelector("#workForm");
+const typeSelect=document.querySelector("#type");
+const statusBox=document.querySelector("#status");
+const saveButton=document.querySelector("#saveButton");
+const coverFile=document.querySelector("#coverFile");
+const coverPreview=document.querySelector("#coverPreview");
+
+function showType(){
+  document.querySelectorAll(".type-fields").forEach(box=>{
+    const active=box.dataset.type===typeSelect.value;
+    box.classList.toggle("active",active);
+    box.querySelectorAll("input").forEach(input=>input.disabled=!active);
+  });
+}
+typeSelect.addEventListener("change",showType);
+showType();
+
+const now=new Date();
+const localDate=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,10);
+form.elements.date.value=localDate;
+
+coverFile.addEventListener("change",()=>{
+  const file=coverFile.files[0];
+  if(!file)return;
+  coverPreview.src=URL.createObjectURL(file);
+  coverPreview.style.display="block";
+});
+
+async function uploadCover(){
+  const file=coverFile.files[0];
+  if(!file)return "";
+  const fileData=await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+  const response=await fetch("/api/upload-image",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({fileName:file.name,fileData})
+  });
+  const result=await response.json();
+  if(!response.ok||!result.success){
+    throw new Error(result.message||"封面上传失败");
+  }
+  return result.url;
+}
+
+form.addEventListener("submit",async event=>{
+  event.preventDefault();
+  saveButton.disabled=true;
+  statusBox.textContent="正在保存……";
+
+  try{
+    const data=Object.fromEntries(new FormData(form).entries());
+    data.type=typeSelect.value;
+    data.cover=await uploadCover();
+
+    const response=await fetch("/api/works/create",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(data)
+    });
+    const result=await response.json();
+
+    if(!response.ok||!result.success){
+      throw new Error(result.message||"保存失败");
+    }
+
+    statusBox.textContent="✓ 已保存到本地：\n"+result.path;
+    form.reset();
+    form.elements.date.value=localDate;
+    coverPreview.style.display="none";
+    showType();
+  }catch(error){
+    statusBox.textContent="保存失败："+error.message;
+  }finally{
+    saveButton.disabled=false;
+  }
+});
+</script>
+</body>
+</html>

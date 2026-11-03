@@ -334,6 +334,18 @@ const server = http.createServer(async (req, res) => {
       res.end(html);
       return;
     }
+
+    if (req.method === "GET" && req.url === "/admin/works/new") {
+      const html = await renderAstro(
+        path.join(root, "local-admin/admin/works/new/index.astro")
+      );
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+      });
+      res.end(html);
+      return;
+    }
+
     if (req.method === "GET" && req.url === "/admin/friends") {
       const html = await renderAstro(
         path.join(root, "local-admin/admin/friends/index.astro")
@@ -897,6 +909,134 @@ ${String(data.content || "")}
               message: "视频上传失败，请检查终端。",
             })
           );
+        }
+      });
+
+      return;
+    }
+
+
+    if (req.method === "POST" && req.url === "/api/works/create") {
+      let body = "";
+
+      req.on("data", chunk => {
+        body += chunk;
+        if (body.length > 1024 * 1024) {
+          req.destroy();
+        }
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+          const types = {
+            movie: "电影",
+            tv: "电视剧",
+            book: "书籍",
+            music: "音乐",
+            game: "游戏",
+          };
+
+          const title = String(data.title || "").trim();
+          const type = String(data.type || "");
+          const date = String(data.date || "");
+          const description = String(data.description || "").trim();
+          const rating = Number(data.rating ?? 0);
+
+          const send = (status, result) => {
+            res.writeHead(status, {
+              "Content-Type": "application/json; charset=utf-8",
+            });
+            res.end(JSON.stringify(result));
+          };
+
+          if (!title || !types[type]) {
+            return send(400, {success:false,message:"请填写作品名称并选择有效类型。"});
+          }
+
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+              Number.isNaN(Date.parse(date))) {
+            return send(400, {success:false,message:"收藏日期格式不正确。"});
+          }
+
+          if (!Number.isFinite(rating) || rating < 0 ||
+              rating > 5 || rating * 2 % 1 !== 0) {
+            return send(400, {success:false,message:"评分必须为 0 到 5 之间的半星刻度。"});
+          }
+
+          const slug = title
+            .replace(/[\/\\:*?"<>|]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/[^\p{L}\p{N}_-]/gu, "")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "")
+            .slice(0, 80);
+
+          if (!slug || slug === "." || slug === "..") {
+            return send(400, {success:false,message:"作品名称无法生成有效文件名。"});
+          }
+
+          const worksDir = path.resolve(root, "src/pages/works/posts");
+          const filePath = path.resolve(worksDir, `${slug}.md`);
+
+          if (!filePath.startsWith(worksDir + path.sep)) {
+            return send(400, {success:false,message:"文件路径无效。"});
+          }
+
+          await fs.mkdir(worksDir, {recursive:true});
+
+          const fields = [
+            "originalTitle","director","cast","region","episodes",
+            "author","translator","publisher","distributor","publishDate",
+            "pages","artist","album","tracks","developer","platform"
+          ];
+
+          const quote = value => JSON.stringify(String(value));
+
+          const lines = [
+            "---",
+            "layout: ../../../layouts/BlogPost.astro",
+            `title: ${quote(title)}`,
+            `date: ${quote(date.replaceAll("-", "."))}`,
+            `description: ${quote(description)}`,
+            `category: ${quote(types[type])}`,
+            `type: ${quote(type)}`,
+            `rating: ${rating}`,
+          ];
+
+          const cover = String(data.cover || "");
+          if (cover.startsWith("/images/") && !cover.includes("..")) {
+            lines.push(`cover: ${quote(cover)}`);
+          }
+
+          for (const key of fields) {
+            const value = String(data[key] || "").trim();
+            if (value) lines.push(`${key}: ${quote(value)}`);
+          }
+
+          lines.push("---", "");
+
+          await fs.writeFile(
+            filePath,
+            lines.join("\n"),
+            {encoding:"utf8", flag:"wx"}
+          );
+
+          return send(200, {
+            success:true,
+            path:`src/pages/works/posts/${slug}.md`
+          });
+        } catch (error) {
+          console.error("创建作品失败：", error);
+          if (!res.headersSent) {
+            res.writeHead(500, {
+              "Content-Type": "application/json; charset=utf-8",
+            });
+          }
+          res.end(JSON.stringify({
+            success:false,
+            message:"创建失败，请检查后台终端。"
+          }));
         }
       });
 
