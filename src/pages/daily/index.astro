@@ -948,3 +948,73 @@ function getExcerpt(post) {
   background: none !important;
 }
 </style>
+
+
+<style>
+/* 碎碎念：JS 瀑布流 */
+@media (min-width: 1051px) {
+  .daily-content-layout .posts {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-auto-rows: 8px;
+    column-count: unset !important;
+    column-gap: 0 !important;
+    gap: 22px !important;
+    align-items: start;
+  }
+
+  .daily-content-layout .posts .post {
+    display: flex !important;
+    height: auto !important;
+    margin: 0 !important;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1050px) {
+  .daily-content-layout .posts {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: 8px;
+    column-count: unset !important;
+    gap: 18px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .daily-content-layout .posts {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto;
+    gap: 18px !important;
+  }
+
+  .daily-content-layout .posts .post {
+    grid-row: auto !important;
+  }
+}
+</style>
+
+<script>
+function arrangeDailyMasonry() {
+  const grid = document.querySelector(".daily-content-layout .posts");
+  if (!grid || window.innerWidth <= 600) return;
+
+  const rowHeight = 8;
+  const styles = getComputedStyle(grid);
+  const rowGap = parseFloat(styles.rowGap) || 0;
+
+  grid.querySelectorAll(".post").forEach((item) => {
+    item.style.gridRowEnd = "auto";
+    const height = item.getBoundingClientRect().height;
+    item.style.gridRowEnd = `span ${Math.ceil((height + rowGap) / rowHeight)}`;
+  });
+}
+
+window.addEventListener("load", arrangeDailyMasonry);
+window.addEventListener("resize", arrangeDailyMasonry);
+document.querySelectorAll(".daily-content-layout .posts img").forEach((img) => {
+  img.addEventListener("load", arrangeDailyMasonry);
+});
+arrangeDailyMasonry();
+</script>
