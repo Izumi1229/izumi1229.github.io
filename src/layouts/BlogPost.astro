@@ -1170,7 +1170,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 }
 
-\n</style>
+.content a {
+  color: #6B9FBE;
+  text-decoration: underline;
+  text-decoration-color: #CFE3EF;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color .2s ease, text-decoration-color .2s ease;
+}
+
+.content a:hover {
+  color: #35495E;
+  text-decoration-color: #7CB1D2;
+}
+
+</style>
 
 
 <script>
@@ -1588,18 +1602,4 @@ document.querySelectorAll(".article-music-player").forEach((player) => {
 }
 </style>
 
-<style is:global>
-.content a {
-  color: #6B9FBE;
-  text-decoration: underline;
-  text-decoration-color: #CFE3EF;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  transition: color .2s ease, text-decoration-color .2s ease;
-}
 
-.content a:hover {
-  color: #35495E;
-  text-decoration-color: #7CB1D2;
-}
-</style>
