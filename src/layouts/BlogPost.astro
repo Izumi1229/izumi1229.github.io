@@ -36,6 +36,9 @@ const currentPost = allPosts.find(
   (post) => post.url === Astro.url.pathname
 );
 
+const music = currentPost?.frontmatter?.music;
+
+
 const rawPosts = import.meta.glob("../pages/*/posts/*.md", {
   eager: true,
   query: "?raw",
@@ -196,6 +199,16 @@ const category =
 
     
       <aside class="floating-toc" id="floating-toc">
+        {music?.src && (
+          <section class="article-music-player">
+            <div class="music-label">NOW PLAYING</div>
+            <div class="music-title">{music.title || "未命名歌曲"}</div>
+            {music.artist && <div class="music-artist">{music.artist}</div>}
+            <audio controls preload="none" src={music.src}>
+              您的浏览器不支持音频播放。
+            </audio>
+          </section>
+        )}
         <div class="floating-toc-title">ON THIS PAGE</div>
         <nav class="floating-toc-list" aria-label="章节导航"></nav>
       </aside>
@@ -221,7 +234,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const headings = Array.from(content.querySelectorAll("h2, h3"));
   if (!headings.length) {
-    floating.hidden = true;
+    const tocTitle = floating.querySelector(".floating-toc-title");
+    if (tocTitle) tocTitle.hidden = true;
+    sideList.hidden = true;
+
+    if (!floating.querySelector(".article-music-player")) {
+      floating.hidden = true;
+    }
     return;
   }
 
@@ -1143,3 +1162,47 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 }
 </style>
+</style>
+
+<style is:global>
+.article-music-player {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #E5EDF1;
+}
+
+.article-music-player .music-label {
+  margin-bottom: 10px;
+  color: #849A98;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: .13em;
+}
+
+.article-music-player .music-title {
+  color: #35495E;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.article-music-player .music-artist {
+  margin-top: 3px;
+  color: #929B9F;
+  font-size: 11px;
+}
+
+.article-music-player audio {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+  .article-music-player {
+    display: none;
+  }
+}
+\n
