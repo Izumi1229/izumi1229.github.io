@@ -38,6 +38,47 @@ const currentPost = allPosts.find(
 
 const music = Astro.props.frontmatter?.music;
 
+const frontmatter = Astro.props.frontmatter || {};
+const workType = frontmatter.type || "";
+
+const workInfoFields = {
+  movie: [
+    ["导演", frontmatter.director],
+    ["主演", frontmatter.cast],
+    ["地区", frontmatter.region],
+    ["上映日期", frontmatter.publishDate],
+  ],
+  tv: [
+    ["导演", frontmatter.director],
+    ["主演", frontmatter.cast],
+    ["地区", frontmatter.region],
+    ["集数", frontmatter.episodes],
+    ["首播日期", frontmatter.publishDate],
+  ],
+  book: [
+    ["作者", frontmatter.author],
+    ["译者", frontmatter.translator],
+    ["出版社", frontmatter.publisher],
+    ["发行方", frontmatter.distributor],
+    ["出版时间", frontmatter.publishDate],
+    ["页数", frontmatter.pages],
+  ],
+  music: [
+    ["艺人", frontmatter.artist],
+    ["专辑", frontmatter.album],
+    ["发行时间", frontmatter.publishDate],
+    ["曲目", frontmatter.tracks],
+  ],
+  game: [
+    ["开发商", frontmatter.developer],
+    ["发行商", frontmatter.publisher],
+    ["平台", frontmatter.platform],
+    ["发行时间", frontmatter.publishDate],
+  ],
+};
+
+const workInfo = workInfoFields[workType] || [];
+
 
 const rawPosts = import.meta.glob("../pages/*/posts/*.md", {
   eager: true,
@@ -125,24 +166,28 @@ const category =
         {path.startsWith("/works/") && (
           <>
             <section class="work-archive">
-              <div class="work-cover-placeholder">
-                <span>COVER</span>
-                <span>COMING SOON</span>
-              </div>
+              {frontmatter.cover ? (
+                <img
+                  class="work-cover-image"
+                  src={frontmatter.cover}
+                  alt={`${title}封面`}
+                />
+              ) : (
+                <div class="work-cover-placeholder">
+                  <span>COVER</span>
+                  <span>COMING SOON</span>
+                </div>
+              )}
+
               <div class="work-details">
                 <div class="work-label">WORK INFORMATION</div>
-                <p class="work-original-title">
-                  {Astro.props.frontmatter?.originalTitle}
-                </p>
+                {frontmatter.originalTitle && (
+                  <p class="work-original-title">
+                    {frontmatter.originalTitle}
+                  </p>
+                )}
                 <dl class="work-info-list">
-                  {[
-                    ["作者", Astro.props.frontmatter?.author],
-                    ["译者", Astro.props.frontmatter?.translator],
-                    ["出版社", Astro.props.frontmatter?.publisher],
-                    ["发行方", Astro.props.frontmatter?.distributor],
-                    ["出版时间", Astro.props.frontmatter?.publishDate],
-                    ["页数", Astro.props.frontmatter?.pages],
-                  ].filter((item) => item[1]).map(([label, value]) => (
+                  {workInfo.filter((item) => item[1]).map(([label, value]) => (
                     <div class="work-info-row">
                       <dt>{label}</dt>
                       <dd>{value}</dd>
@@ -607,6 +652,15 @@ document.addEventListener("DOMContentLoaded", () => {
     letter-spacing: 0.14em;
   }
   .review-empty { margin: 22px 0 0; color: #A0B2B2; font-size: 13px; }
+  .work-cover-image {
+    width: 320px;
+    min-height: 254px;
+    max-height: 420px;
+    object-fit: contain;
+    border-radius: 4px;
+    background: #F8FCFB;
+    display: block;
+  }
   .review-body {
     margin-top: 22px;
     max-width: 700px;
