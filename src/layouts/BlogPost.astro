@@ -204,9 +204,19 @@ const category =
             <div class="music-label">NOW PLAYING</div>
             <div class="music-title">{music.title || "未命名歌曲"}</div>
             {music.artist && <div class="music-artist">{music.artist}</div>}
-            <audio controls preload="none" src={music.src}>
-              您的浏览器不支持音频播放。
-            </audio>
+            <audio class="music-audio" preload="metadata" src={music.src}></audio>
+            <div class="music-controls">
+              <button class="music-play" type="button" aria-label="播放">
+                <span class="play-icon">▶</span>
+              </button>
+              <div class="music-timeline">
+                <input class="music-progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="播放进度" />
+                <div class="music-time">
+                  <span class="music-current">0:00</span>
+                  <span class="music-duration">0:00</span>
+                </div>
+              </div>
+            </div>
           </section>
         )}
         <div class="floating-toc-title">ON THIS PAGE</div>
@@ -956,7 +966,172 @@ document.addEventListener("DOMContentLoaded", () => {
 
 \n</style>
 
+
+<script>
+document.querySelectorAll(".article-music-player").forEach((player) => {
+  const audio = player.querySelector(".music-audio");
+  const button = player.querySelector(".music-play");
+  const icon = player.querySelector(".play-icon");
+  const progress = player.querySelector(".music-progress");
+  const current = player.querySelector(".music-current");
+  const duration = player.querySelector(".music-duration");
+  if (!audio || !button || !progress) return;
+
+  const formatTime = (seconds) => {
+    if (!Number.isFinite(seconds)) return "0:00";
+    return Math.floor(seconds / 60) + ":" +
+      String(Math.floor(seconds % 60)).padStart(2, "0");
+  };
+
+  audio.addEventListener("loadedmetadata", () => {
+    duration.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener("timeupdate", () => {
+    current.textContent = formatTime(audio.currentTime);
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      progress.value = audio.currentTime / audio.duration * 100;
+    }
+  });
+
+  button.addEventListener("click", async () => {
+    if (audio.paused) {
+      try {
+        await audio.play();
+        icon.textContent = "Ⅱ";
+        button.setAttribute("aria-label", "暂停");
+      } catch (error) {
+        console.error("音乐播放失败：", error);
+      }
+    } else {
+      audio.pause();
+    }
+  });
+
+  audio.addEventListener("pause", () => {
+    icon.textContent = "▶";
+    button.setAttribute("aria-label", "播放");
+  });
+
+  audio.addEventListener("ended", () => {
+    progress.value = 0;
+    current.textContent = "0:00";
+  });
+
+  progress.addEventListener("input", () => {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      audio.currentTime = Number(progress.value) / 100 * audio.duration;
+    }
+  });
+});
+</script>
+
 <style is:global>
+
+/* IZUMI mini music player */
+.article-music-player {
+  margin-bottom: 25px;
+  padding: 17px 15px 18px;
+  background: #F8FCFB;
+  border: 1px solid #E5EDF1;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+.article-music-player .music-label {
+  margin-bottom: 13px;
+  color: #849A98;
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+}
+.article-music-player .music-title {
+  color: #35495E;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.article-music-player .music-artist {
+  margin-top: 3px;
+  color: #929B9F;
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+.article-music-player .music-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 17px;
+}
+.article-music-player .music-play {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #CFE3EF;
+  color: #35495E;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, transform .2s;
+}
+.article-music-player .music-play:hover {
+  background: #B9D6E8;
+  transform: scale(1.06);
+}
+.article-music-player .play-icon {
+  font-size: 11px;
+  margin-left: 2px;
+}
+.article-music-player .music-timeline {
+  flex: 1;
+  min-width: 0;
+}
+.article-music-player .music-progress {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin: 0;
+  border-radius: 5px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #DCE9EE;
+  cursor: pointer;
+}
+.article-music-player .music-progress::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #7CB1D2;
+}
+.article-music-player .music-progress::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: #7CB1D2;
+}
+.article-music-player .music-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  color: #929B9F;
+  font-family: monospace;
+  font-size: 9px;
+}
+.article-music-player audio {
+  display: none;
+}
+@media (max-width: 1100px) {
+  .article-music-player {
+    display: none;
+  }
+}
+
 /* ===== TOC visual refinement ===== */
 
 .article-toc {
