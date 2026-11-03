@@ -1,0 +1,729 @@
+---
+import fs from "node:fs";
+import path from "node:path";
+
+const file = Astro.url.searchParams.get("file");
+
+if (!file) {
+  throw new Error("没有找到文章文件。");
+}
+
+const filePath = path.resolve(
+  process.cwd(),
+  "src/pages",
+  file
+);
+
+const content = fs.readFileSync(filePath, "utf-8");
+
+const match = content.match(
+  /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/
+);
+
+if (!match) {
+  throw new Error("文章格式不正确。");
+}
+
+const frontmatter = match[1];
+const body = match[2].trim();
+
+const getValue = (key: string) => {
+  const result = frontmatter.match(
+    new RegExp(`^${key}:\\s*"([\s\S]*?)"$`, "m")
+  );
+  return result ? result[1] : "";
+};
+
+const title = getValue("title");
+const date = getValue("date");
+const description = getValue("description");
+const rawCategory = getValue("category");
+const category = ({
+  "碎碎念": "日常",
+  "到处乱跑": "旅行",
+  "听写小作坊": "字幕",
+  "书影音游": "作品分享",
+}[rawCategory] || rawCategory);
+const cover = getValue("cover");
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EDIT / IZUMI'S BLOG</title>
+
+    <style>
+      :global(*) {
+        box-sizing: border-box;
+      }
+
+      :global(body) {
+        margin: 0;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(134, 197, 255, 0.16), transparent 30%),
+          radial-gradient(circle at 90% 20%, rgba(124, 177, 210, 0.12), transparent 28%),
+          #f8fcfb;
+        color: #35495e;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+      }
+
+      .container {
+        width: min(920px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 42px 0 90px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 70px;
+      }
+
+      .logo {
+        color: #35495e;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1.8px;
+      }
+
+      .admin {
+        color: #7c9bad;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+      }
+
+      .hero {
+        margin-bottom: 42px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        color: #7caecf;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1px;
+        background: #86c5ff;
+      }
+
+      h1 {
+        margin: 0;
+        color: #35495e;
+        font-size: clamp(30px, 5vw, 44px);
+        font-weight: 500;
+        letter-spacing: -1px;
+      }
+
+      .file-name {
+        margin-top: 12px;
+        color: #9aadb5;
+        font-family: monospace;
+        font-size: 11px;
+        word-break: break-all;
+      }
+
+      .panel {
+        padding: 30px;
+        border: 1px solid rgba(207, 227, 239, 0.95);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow:
+          0 18px 50px rgba(124, 177, 210, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+      }
+
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+
+      .field-label {
+        color: #607b8b;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid #cfe3ef;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #35495e;
+        padding: 13px 15px;
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: #86c5ff;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(134, 197, 255, 0.12);
+      }
+
+      textarea {
+        min-height: 105px;
+        resize: vertical;
+        line-height: 1.8;
+      }
+
+      .edit-cover {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .cover-preview {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #849a98;
+        background: #f8fcfb;
+        border: 1px dashed #cfe3ef;
+        border-radius: 12px;
+        font-size: 13px;
+      }
+
+      .cover-preview img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .cover-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .cover-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 13px;
+        color: #55778b;
+        background: #f7fbfd;
+        border: 1px solid #cfe3ef;
+        border-radius: 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .cover-button:hover {
+        border-color: #86c5ff;
+        background: #eef8ff;
+      }
+
+      .cover-button input {
+        display: none;
+      }
+
+      .cover-button.remove {
+        background: transparent;
+      }
+
+      .content-area {
+        min-height: 480px;
+        font-family:
+          "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        font-size: 13px;
+        line-height: 1.75;
+      }
+
+      .tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .upload-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        width: auto;
+        padding: 9px 13px;
+        border: 1px solid #cfe3ef;
+        border-radius: 10px;
+        background: #f7fbfd;
+        color: #55778b;
+        font-size: 12px;
+        cursor: pointer;
+        transition:
+          background 0.2s ease,
+          border-color 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .upload-label:hover {
+        border-color: #86c5ff;
+        background: #eef8ff;
+        transform: translateY(-1px);
+      }
+
+      .upload-label input {
+        display: none;
+      }
+
+      .status {
+        min-height: 18px;
+        margin-top: 8px;
+        color: #86a0ad;
+        font-size: 11px;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
+      }
+
+      .save-button {
+        border: 0;
+        border-radius: 12px;
+        background: #7cb1d2;
+        color: white;
+        padding: 13px 22px;
+        font-size: 12px;
+        letter-spacing: 0.8px;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(124, 177, 210, 0.2);
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .save-button:hover {
+        background: #6ba6cc;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(124, 177, 210, 0.25);
+      }
+
+      .back {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 25px;
+        color: #7c9bad;
+        font-size: 12px;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .back:hover {
+        color: #5e9bc5;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          width: min(100% - 24px, 920px);
+          padding-top: 28px;
+        }
+
+        header {
+          margin-bottom: 48px;
+        }
+
+        .panel {
+          padding: 20px;
+          border-radius: 18px;
+        }
+
+        .content-area {
+          min-height: 400px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="container">
+      <header>
+        <div class="logo">IZUMI'S BLOG</div>
+        <div class="admin">ADMIN / EDIT</div>
+      </header>
+
+      <section class="hero">
+        <div class="eyebrow">EDIT / ARTICLE</div>
+        <h1>编辑文章</h1>
+        <div class="file-name">{file}</div>
+      </section>
+
+      <section class="panel">
+        <form class="form">
+          <label class="field">
+            <span class="field-label">标题</span>
+            <input name="title" value="{title}" />
+          </label>
+
+          <label class="field">
+            <span class="field-label">分类</span>
+            <select name="category" id="categorySelect">
+              <option value="日常" __SELECT_DAILY__>碎碎念</option>
+              <option value="旅行" __SELECT_TRAVEL__>到处乱跑</option>
+              <option value="字幕" __SELECT_SUBTITLES__>听写小作坊</option>
+              <option value="作品分享" __SELECT_WORKS__>书影音游</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">日期</span>
+            <input name="date" type="date" value="{date}" />
+          </label>
+
+          <label class="field">
+            <span class="field-label">简介</span>
+            <textarea name="description">{description}</textarea>
+          </label>
+
+          <div class="field">
+            <span class="field-label">文章封面</span>
+
+            <div class="edit-cover">
+              <div id="coverPreview" class="cover-preview">
+                {cover ? (
+                  <img src={cover} alt="当前文章封面" />
+                ) : (
+                  <span>还没有设置封面</span>
+                )}
+              </div>
+
+              <div class="cover-actions">
+                <label class="cover-button">
+                  更换封面
+                  <input
+                    id="coverInput"
+                    type="file"
+                    accept="image/*"
+                  />
+                </label>
+
+                <button
+                  id="removeCoverButton"
+                  type="button"
+                  class="cover-button remove"
+                >
+                  删除封面
+                </button>
+              </div>
+
+              <input
+                id="cover"
+                name="cover"
+                type="hidden"
+                value={cover}
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">正文</span>
+
+            <div class="tools">
+              <label class="upload-label">
+                📷 插入图片
+                <input type="file" id="imageFile" accept="image/*" />
+              </label>
+
+              <label class="upload-label">
+                🎬 插入视频
+                <input
+                  type="file"
+                  id="videoFile"
+                  accept="video/mp4,video/webm,video/quicktime"
+                />
+              </label>
+            </div>
+
+            <div class="status">
+              <span id="imageStatus"></span>
+              <span id="videoStatus"></span>
+            </div>
+
+            <textarea name="content" class="content-area">{body}</textarea>
+          </div>
+
+          <div class="actions">
+            <button class="save-button" type="submit">
+              SAVE CHANGES ↗
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <a href="/admin/posts" class="back">← 返回文章管理</a>
+    </main>
+
+    <script data-file="{file}">
+      const form = document.querySelector(".form");
+      const categorySelect = document.querySelector("#categorySelect");
+      const file =
+        document.querySelector("script[data-file]")?.dataset.file || "";
+
+      const imageFile = document.querySelector("#imageFile");
+      const imageStatus = document.querySelector("#imageStatus");
+
+      const videoFile = document.querySelector("#videoFile");
+      const videoStatus = document.querySelector("#videoStatus");
+
+      const coverInput = document.querySelector("#coverInput");
+      const coverPreview = document.querySelector("#coverPreview");
+      const coverField = document.querySelector("#cover");
+      const removeCoverButton = document.querySelector("#removeCoverButton");
+
+      coverInput?.addEventListener("change", async () => {
+        const file = coverInput.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+          alert("请选择图片文件。");
+          coverInput.value = "";
+          return;
+        }
+
+        removeCoverButton.disabled = true;
+        removeCoverButton.textContent = "上传中……";
+
+        try {
+          const reader = new FileReader();
+
+          const fileData = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("读取图片失败。"));
+            reader.readAsDataURL(file);
+          });
+
+          const response = await fetch("/api/upload-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fileName: file.name,
+              fileData,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            throw new Error(result.message || "封面上传失败。");
+          }
+
+          coverField.value = result.url;
+          coverPreview.innerHTML = "";
+
+          const previewImage = document.createElement("img");
+          previewImage.src = result.url;
+          previewImage.alt = "文章封面预览";
+          coverPreview.appendChild(previewImage);
+
+          alert("封面上传成功！记得点击 SAVE CHANGES 保存文章。");
+        } catch (error) {
+          console.error(error);
+          alert(error.message || "封面上传失败，请检查 Admin 服务。");
+        } finally {
+          removeCoverButton.disabled = false;
+          removeCoverButton.textContent = "删除封面";
+        }
+      });
+
+      removeCoverButton?.addEventListener("click", () => {
+        coverField.value = "";
+        coverInput.value = "";
+        coverPreview.innerHTML = "<span>还没有设置封面</span>";
+        alert("已移除封面，请点击 SAVE CHANGES 保存修改。");
+      });
+
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const currentCategory = "__CATEGORY__";
+
+        if (categorySelect) {
+          categorySelect.value = currentCategory;
+        }
+      });
+
+      function insertAtCursor(text) {
+        const content = document.querySelector('textarea[name="content"]');
+
+        if (!content) return;
+
+        const start = content.selectionStart;
+        const end = content.selectionEnd;
+
+        content.value =
+          content.value.slice(0, start) +
+          text +
+          content.value.slice(end);
+
+        content.focus();
+
+        const newPosition = start + text.length;
+        content.selectionStart = newPosition;
+        content.selectionEnd = newPosition;
+      }
+
+      imageFile?.addEventListener("change", async () => {
+        const selectedFile = imageFile.files?.[0];
+
+        if (!selectedFile) return;
+
+        imageStatus.textContent = "正在上传图片……";
+
+        const reader = new FileReader();
+
+        reader.onload = async () => {
+          try {
+            const response = await fetch("/api/upload-image", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileName: selectedFile.name,
+                fileData: reader.result,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              insertAtCursor(
+                `\n![${result.fileName}](${result.url})\n`
+              );
+
+              imageStatus.textContent = "图片上传成功，已插入正文。";
+            } else {
+              imageStatus.textContent = result.message;
+            }
+          } catch (error) {
+            console.error(error);
+            imageStatus.textContent = "图片上传失败。";
+          }
+        };
+
+        reader.readAsDataURL(selectedFile);
+      });
+
+      videoFile?.addEventListener("change", async () => {
+        const selectedFile = videoFile.files?.[0];
+
+        if (!selectedFile) return;
+
+        videoStatus.textContent = "正在上传视频……";
+
+        const reader = new FileReader();
+
+        reader.onload = async () => {
+          try {
+            const response = await fetch("/api/upload-video", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileName: selectedFile.name,
+                fileData: reader.result,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              insertAtCursor(
+                `\n<video controls preload="metadata" src="${result.url}"></video>\n`
+              );
+
+              videoStatus.textContent = "视频上传成功，已插入正文。";
+            } else {
+              videoStatus.textContent = result.message;
+            }
+          } catch (error) {
+            console.error(error);
+            videoStatus.textContent = "视频上传失败。";
+          }
+        };
+
+        reader.readAsDataURL(selectedFile);
+      });
+
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+
+        const data = {
+          file,
+          title: formData.get("title"),
+          category: formData.get("category"),
+          date: formData.get("date"),
+          description: formData.get("description"),
+          cover: document.querySelector("#cover").value,
+          content: formData.get("content"),
+        };
+
+        try {
+          const response = await fetch("/api/edit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert("文章修改成功！");
+            window.location.href = "/admin/posts";
+          } else {
+            alert(result.message);
+          }
+        } catch (error) {
+          console.error(error);
+          alert("保存失败，请检查 Admin 服务是否正常运行。");
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -137,6 +137,58 @@ async function uploadImage(data) {
   };
 }
 
+
+async function uploadMusic(data) {
+  const fileName = String(data.fileName || "").trim();
+  const fileData = String(data.fileData || "").trim();
+
+  if (!fileName || !fileData) {
+    return { success: false, message: "没有收到 MP3 文件。" };
+  }
+
+  const ext = path.extname(fileName).toLowerCase();
+
+  if (ext !== ".mp3") {
+    return { success: false, message: "目前只支持 MP3 格式。" };
+  }
+
+  const match = fileData.match(/^data:audio\/(?:mpeg|mp3);base64,([A-Za-z0-9+/=\s]+)$/i);
+
+  if (!match) {
+    return { success: false, message: "MP3 文件数据格式不正确。" };
+  }
+
+  const buffer = Buffer.from(match[1], "base64");
+
+  if (!buffer.length) {
+    return { success: false, message: "MP3 文件为空。" };
+  }
+
+  if (buffer.length > 25 * 1024 * 1024) {
+    return { success: false, message: "MP3 文件不能超过 25 MB。" };
+  }
+
+  const safeName = `${Date.now()}-${path
+    .basename(fileName, ext)
+    .replace(/[^\w\u4e00-\u9fff-]+/g, "-")}.mp3`;
+
+  const musicDir = path.join(root, "public", "music");
+  await fs.mkdir(musicDir, { recursive: true });
+  await fs.writeFile(path.join(musicDir, safeName), buffer);
+
+  return {
+    success: true,
+    fileName: safeName,
+    url: `/music/${encodeURIComponent(safeName)}`,
+  };
+}
+
+function musicFrontmatter(music) {
+  if (!music || !String(music.src || "").trim()) return "";
+
+  return `\nmusic:\n  title: ${JSON.stringify(String(music.title || "").trim())}\n  artist: ${JSON.stringify(String(music.artist || "").trim())}\n  src: ${JSON.stringify(String(music.src).trim())}`;
+}
+
 async function publish(data) {
   const title = String(data.title || "").trim();
   const category = String(data.category || "").trim();
@@ -144,6 +196,8 @@ async function publish(data) {
   const description = String(data.description || "").trim();
   const cover = String(data.cover || "").trim();
   const content = String(data.content || "").trim();
+  const music = data.music && typeof data.music === "object" ? data.music : null;
+  const musicYaml = musicFrontmatter(music);
 
   if (!title || !category || !date || !content) {
     return {
@@ -192,7 +246,7 @@ layout: ../../../layouts/BlogPost.astro
 title: "${title.replace(/"/g, '\\"')}"
 date: "${date}"
 description: "${description.replace(/"/g, '\\"')}"
-category: "${category}"${cover ? `\ncover: "${cover.replace(/"/g, '\\"')}"` : ""}
+category: "${category}"${cover ? `\ncover: "${cover.replace(/"/g, '\\"')}"` : ""}${musicYaml}
 ---
 
 ${content}
@@ -493,6 +547,35 @@ const server = http.createServer(async (req, res) => {
         const description = getValue("description");
         const category = getValue("category");
 
+        // 读取文章原有音乐信息
+        const musicMatch = frontmatter.match(
+          /^music:\s*\r?\n((?:[ \t]+.*(?:\r?\n|$))*)/m
+        );
+        const musicBlock = musicMatch ? musicMatch[1] : "";
+
+        const getMusicValue = (key) => {
+          const result = musicBlock.match(
+            new RegExp(
+              `^[ \\t]+${key}:\\s*(?:"((?:\\\\.|[^"])*)"|'([^']*)'|(.*))$`,
+              "m"
+            )
+          );
+
+          if (!result) return "";
+
+          const value = result[1] ?? result[2] ?? result[3] ?? "";
+
+          try {
+            return result[1] ? JSON.parse(`"${result[1]}"`) : value.trim();
+          } catch {
+            return value.trim();
+          }
+        };
+
+        const musicTitle = getMusicValue("title");
+        const musicArtist = getMusicValue("artist");
+        const musicSrc = getMusicValue("src");
+
         const html = await renderAstro(
           path.join(root, "local-admin/admin/edit/index.astro"),
           {
@@ -502,6 +585,9 @@ const server = http.createServer(async (req, res) => {
             description,
             category,
             body,
+            musicTitle,
+            musicArtist,
+            musicSrc,
           }
         );
 
@@ -665,12 +751,15 @@ const server = http.createServer(async (req, res) => {
 
           const filePath = path.resolve(process.cwd(), "src/pages", file);
 
+          const music = data.music && typeof data.music === "object" ? data.music : null;
+          const musicYaml = musicFrontmatter(music);
+
           const content = `---
 layout: ../../../layouts/BlogPost.astro
 title: "${String(data.title || "").replace(/"/g, '\\"')}"
 date: "${String(data.date || "").replace(/-/g, ".")}"
 description: "${String(data.description || "").replace(/"/g, '\\"')}"
-category: "${String(data.category || "")}"${String(data.cover || "").trim() ? `\ncover: "${String(data.cover || "").trim().replace(/"/g, '\\"')}"` : ""}
+category: "${String(data.category || "")}"${String(data.cover || "").trim() ? `\ncover: "${String(data.cover || "").trim().replace(/"/g, '\\"')}"` : ""}${musicYaml}
 ---
 
 ${String(data.content || "")}
@@ -706,6 +795,42 @@ ${String(data.content || "")}
 
       return;
     }
+    if (req.method === "POST" && req.url === "/api/upload-music") {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+        if (body.length > 36 * 1024 * 1024) {
+          req.destroy();
+        }
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+          const result = await uploadMusic(data);
+
+          res.writeHead(result.success ? 200 : 400, {
+            "Content-Type": "application/json; charset=utf-8",
+          });
+          res.end(JSON.stringify(result));
+        } catch (error) {
+          console.error("MP3 上传失败：", error);
+          if (!res.headersSent) {
+            res.writeHead(500, {
+              "Content-Type": "application/json; charset=utf-8",
+            });
+            res.end(JSON.stringify({
+              success: false,
+              message: "MP3 上传失败，请检查终端。",
+            }));
+          }
+        }
+      });
+
+      return;
+    }
+
     if (req.method === "POST" && req.url === "/api/upload-image") {
       let body = "";
 
