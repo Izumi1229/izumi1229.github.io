@@ -36,8 +36,7 @@ const currentPost = allPosts.find(
   (post) => post.url === Astro.url.pathname
 );
 
-const music = Astro.props.music;
-console.log("[BlogPost props]", JSON.stringify(Astro.props));
+const music = Astro.props.frontmatter?.music;
 
 
 const rawPosts = import.meta.glob("../pages/*/posts/*.md", {
