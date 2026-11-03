@@ -91,6 +91,7 @@ function getExcerpt(post) {
           ))}
         </section>
 
+        <div class="right-sidebar">
         <aside class="post-timeline">
           <p class="timeline-label">TIMELINE / 时间轴</p>
           {Object.entries(
@@ -138,6 +139,7 @@ function getExcerpt(post) {
             <span class="side-category-desc">喜欢什么就往这里丢。</span>
           </a>
         </nav>
+        </div>
       </div>
 
         <footer class="site-footer">
@@ -1109,4 +1111,71 @@ function getExcerpt(post) {
   opacity: 0 !important;
   background: none !important;
 }
+</style>
+
+
+<style>
+  /* 听写小作坊：文章列表 + 右侧时间轴与分类栏 */
+  .daily-content-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 35px;
+    align-items: start;
+  }
+
+  .right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+    min-width: 0;
+  }
+
+  .right-sidebar .side-categories {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .right-sidebar .side-categories-label {
+    display: block;
+    width: 100%;
+  }
+
+  .right-sidebar a.side-category {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    white-space: normal;
+    writing-mode: horizontal-tb;
+  }
+
+  .right-sidebar .side-category-name,
+  .right-sidebar .side-category-en {
+    display: inline-block;
+    writing-mode: horizontal-tb;
+  }
+
+  @media (max-width: 900px) {
+    .daily-content-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .right-sidebar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .right-sidebar {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
 </style>
