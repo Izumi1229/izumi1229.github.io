@@ -4,6 +4,10 @@ title: "【Aegisub】软件简单介绍及打轴方法"
 date: "2026.10.04"
 description: "简单介绍工作界面及轴处理！"
 category: "字幕"
+music:
+  title: "S say -Sinfonia-"
+  artist: "Hey! Say! JUMP"
+  src: "/music/1793724432967-S-say--Sinfonia----Hey-Say-JUMP---APLMate-com.mp3"
 ---
 
 ## Aeg工作界面
