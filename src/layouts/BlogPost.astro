@@ -118,6 +118,45 @@ const category =
 
         <p class="description">{description}</p>
 
+        {path.startsWith("/works/") && (
+          <>
+            <section class="work-archive">
+              <div class="work-cover-placeholder">
+                <span>COVER</span>
+                <span>COMING SOON</span>
+              </div>
+              <div class="work-details">
+                <div class="work-label">WORK INFORMATION</div>
+                <p class="work-original-title">
+                  {Astro.props.frontmatter?.originalTitle}
+                </p>
+                <dl class="work-info-list">
+                  {[
+                    ["作者", Astro.props.frontmatter?.author],
+                    ["译者", Astro.props.frontmatter?.translator],
+                    ["出版社", Astro.props.frontmatter?.publisher],
+                    ["发行方", Astro.props.frontmatter?.distributor],
+                    ["出版时间", Astro.props.frontmatter?.publishDate],
+                    ["页数", Astro.props.frontmatter?.pages],
+                  ].filter((item) => item[1]).map(([label, value]) => (
+                    <div class="work-info-row">
+                      <dt>{label}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </section>
+            <section class="my-review">
+              <div class="review-heading">
+                <span>MY REVIEW</span>
+                <span>✳</span>
+              </div>
+              <p class="review-empty">还没有写下关于这部作品的感受。</p>
+            </section>
+          </>
+        )}
+
         <div class="line"></div>
 
         <div class="content">
@@ -499,6 +538,72 @@ document.addEventListener("DOMContentLoaded", () => {
   .line {
     margin: 55px 0;
     border-top: 1px solid #FFA62B;
+  }
+
+  .work-archive {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.75fr) minmax(0, 1.25fr);
+    gap: 38px;
+    margin: 45px 0 55px;
+    padding: 28px;
+    border: 1px solid #DCE8E8;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  .work-cover-placeholder {
+    min-height: 245px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    background: #EEF5F7;
+    color: #9AB7C5;
+    font: 11px monospace;
+    letter-spacing: 0.13em;
+  }
+
+  .work-details { min-width: 0; padding: 8px 0; }
+  .work-label {
+    margin-bottom: 22px;
+    color: #7CB1D2;
+    font: 11px monospace;
+    letter-spacing: 0.14em;
+  }
+  .work-original-title { margin: 0 0 22px; color: #849A98; font-size: 14px; }
+  .work-info-list { margin: 0; }
+  .work-info-row {
+    display: grid;
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #E8EEEE;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .work-info-row dt { color: #91A7A7; }
+  .work-info-row dd { margin: 0; color: #35495E; overflow-wrap: anywhere; }
+  .my-review { margin: 0 0 45px; }
+  .review-heading {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #DCE8E8;
+    color: #7CB1D2;
+    font: 12px monospace;
+    letter-spacing: 0.14em;
+  }
+  .review-empty { margin: 22px 0 0; color: #A0B2B2; font-size: 13px; }
+
+  @media (max-width: 700px) {
+    .work-archive {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin: 35px 0 45px;
+      padding: 18px;
+    }
+    .work-cover-placeholder { min-height: 190px; }
   }
 
   .content {
