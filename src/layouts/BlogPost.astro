@@ -796,7 +796,8 @@ document.addEventListener("DOMContentLoaded", () => {
     line-height: 1.6 !important;
   }
 
-  .content :global(.blur-text) {
+  .content :global(.blur-text),
+  .review-body :global(.blur-text) {
     display: inline;
     color: #849A98;
     background: rgba(207, 227, 239, 0.35);
@@ -808,7 +809,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   .content :global(.blur-text:hover),
   .content :global(.blur-text:focus),
-  .content :global(.blur-text.revealed) {
+  .content :global(.blur-text.revealed),
+  .review-body :global(.blur-text:hover),
+  .review-body :global(.blur-text:focus),
+  .review-body :global(.blur-text.revealed) {
     filter: blur(0);
     background: rgba(207, 227, 239, 0.2);
     outline: none;
