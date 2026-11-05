@@ -1607,3 +1607,24 @@ document.querySelectorAll(".article-music-player").forEach((player) => {
 </style>
 
 
+\n
+<script>
+  const blogStart = new Date("填写博客起始日期");
+  const liveTime = document.querySelector("#blog-live-time");
+
+  function updateBlogLiveTime() {
+    if (!liveTime) return;
+
+    const diff = Date.now() - blogStart.getTime();
+    const totalMinutes = Math.floor(diff / 60000);
+
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    liveTime.textContent = `${days} days, ${hours} hours, ${minutes} mins`;
+  }
+
+  updateBlogLiveTime();
+  setInterval(updateBlogLiveTime, 60000);
+</script>
